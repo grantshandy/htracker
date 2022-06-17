@@ -28,6 +28,9 @@ async fn main() -> std::io::Result<()> {
         App::new()
             .wrap(Logger::default())
             .app_data(server_data.clone())
+            // these are all their individual services
+            // instead of accessing a directory because
+            // I want the binary to be self contained
             .service(public::login_html)
             .service(public::login_js)
             .service(public::dashboard_html)
