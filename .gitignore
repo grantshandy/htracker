@@ -1,2 +1,4 @@
 Cargo.lock
 /target/
+htracker-server/MAILJET_SECRET_KEY
+htracker-server/MAILJET_PUBLIC_KEY
