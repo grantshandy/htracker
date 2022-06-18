@@ -3,6 +3,9 @@ use actix_web::{get, http::header::ContentType, HttpResponse};
 const LOGIN_HTML: &'static str = include_str!("../dist/login/login.html");
 const LOGIN_JS: &'static str = include_str!("../dist/login/login.js");
 
+const REGISTER_HTML: &'static str = include_str!("../dist/register/register.html");
+const REGISTER_JS: &'static str = include_str!("../dist/register/register.js");
+
 const DASHBOARD_HTML: &'static str = include_str!("../dist/dashboard/dashboard.html");
 const DASHBOARD_JS: &'static str = include_str!("../dist/dashboard/dashboard.js");
 
@@ -22,6 +25,20 @@ pub async fn login_js() -> HttpResponse {
     HttpResponse::Ok()
         .content_type("Content-Type: application/javascript; charset=utf-8")
         .body(LOGIN_JS)
+}
+
+#[get("/register")]
+pub async fn register_html() -> HttpResponse {
+    HttpResponse::Ok()
+        .content_type(ContentType::html())
+        .body(REGISTER_HTML)
+}
+
+#[get("/register.js")]
+pub async fn register_js() -> HttpResponse {
+    HttpResponse::Ok()
+        .content_type("Content-Type: application/javascript; charset=utf-8")
+        .body(REGISTER_JS)
 }
 
 #[get("/dashboard")]

@@ -20,7 +20,7 @@ pub async fn send_validation_email(user_info: &IntermediateUserInfo) -> Option<S
 
     let mut email_contents = String::from(VALIDATION_EMAIL).replace("NAME", &user_info.username);
     email_contents.push_str(&format!(
-        "{}/api/verify/{}",
+        "{}/validate/{}",
         BASE_URL, user_info.validation_string
     ));
 

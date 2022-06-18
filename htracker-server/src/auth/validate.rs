@@ -1,12 +1,12 @@
-use actix_web::{get, web, HttpRequest, HttpResponse};
+use actix_web::{get, http::header::ContentType, web, HttpRequest, HttpResponse};
 use mongodb::bson::doc;
 
 use crate::{data::UserData, server_error, ServerData};
 
 use super::{gen_auth_key, IntermediateUserInfo, UserInfo};
 
-#[get("/api/verify/{validation_string}")]
-pub async fn verify_account(
+#[get("/validate/{validation_string}")]
+pub async fn validate_account(
     validation_string: web::Path<String>,
     req: HttpRequest,
 ) -> HttpResponse {
@@ -67,6 +67,18 @@ pub async fn verify_account(
     };
 
     HttpResponse::Ok()
-        .append_header(("Location", "/"))
-        .body("<p>it worked!<p>")
+        .content_type(ContentType::html())
+        .body(REDIRECT_PAGE)
 }
+
+const REDIRECT_PAGE: &'static str = r##"<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+<body>
+  <h1>success, redirecting...</h1>
+  <script>window.location.href = '/login'</script>
+</body>
+</html>"##;

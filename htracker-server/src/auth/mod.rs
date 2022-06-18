@@ -1,13 +1,11 @@
-mod login;
 mod register;
-mod verify;
+mod validate;
 
-use actix_web::{HttpRequest, HttpResponse};
-pub use login::login_auth;
+use actix_web::{get, HttpRequest, HttpResponse};
 use mongodb::bson::doc;
 pub use register::{register_account, IntermediateUserInfo};
 use serde::{Deserialize, Serialize};
-pub use verify::verify_account;
+pub use validate::validate_account;
 
 use crate::{bad_request_error, server_error, ServerData};
 
@@ -18,7 +16,7 @@ pub struct UserInfo {
     pub email: String,
 }
 
-pub async fn validate_auth_token(req: &HttpRequest) -> Result<String, HttpResponse> {
+pub async fn validate_auth_token(req: &HttpRequest) -> Result<Option<String>, HttpResponse> {
     // get token bytes from header
     let auth_token = match req.headers().get("X-AuthToken") {
         Some(token) => token,
@@ -72,15 +70,29 @@ pub async fn validate_auth_token(req: &HttpRequest) -> Result<String, HttpRespon
     {
         Ok(data) => {
             if data.is_none() {
-                return Err(bad_request_error("invalid username or password"));
+                return Ok(None);
             }
         }
         Err(err) => return Err(server_error(&format!("error accessing database: {err}"))),
     };
 
-    Ok(auth_token_text)
+    Ok(Some(auth_token_text))
 }
 
 pub fn gen_auth_key<A: AsRef<str>>(username: A, password: A) -> String {
     base64::encode(format!("{}:{}", username.as_ref(), password.as_ref()))
+}
+
+#[get("/api/auth")]
+pub async fn auth(req: HttpRequest) -> HttpResponse {
+    let res = match validate_auth_token(&req).await {
+        Ok(res) => match res {
+            Some(_) => true,
+            None => false,
+        },
+        Err(err) => return err,
+    };
+
+    // another use of manual json formatting
+    HttpResponse::Ok().body(format!("{{\"valid\":{res}}}"))
 }
