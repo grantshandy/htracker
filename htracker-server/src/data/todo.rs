@@ -33,7 +33,7 @@ impl InternalTodo {
 
 // todo that the client sends
 #[derive(Serialize, Deserialize, Debug, Clone)]
-pub struct ExternalTodo {
+struct ExternalTodo {
     pub name: String,
 }
 

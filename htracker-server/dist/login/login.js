@@ -26,7 +26,12 @@ createApp({
     },
 
     methods: {
-        login() {
+        login(event) {
+            // only really run this function when keypressed if we press enter
+            if (event && event.key && event.key != 'Enter') {
+                return;
+            }
+
             this.error = null;
 
             let username = this.username;
@@ -48,7 +53,7 @@ createApp({
                         this.setAccessToken(username, password);
                         window.location.href = '/dashboard';
                     } else {
-                        this.error = "Incorrect Username or Password";
+                        this.error = "incorrect username or password";
                     }
                 }
             });

@@ -12,6 +12,14 @@
 <body>
     <div id="app">
         <div class="page-box">
+            <div v-if="error" class="error-box">
+                <p class="float-left font-bold pr-4">Error: {{ error }}</p>
+                <button class="float-right inline-flex items-center justify-center bg-error hover:bg-error-dark rounded-full" v-on:click="error = null">
+                    <svg class="h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                </button>
+            </div>
             <div class="top-text">
                 <button class="float-left" v-on:click="logout">Logout</button>
                 <button class="float-right" v-if="darkMode" v-on:click="disableDarkMode">
@@ -21,19 +29,25 @@
                     Switch to Dark Mode
                 </button>
             </div>
-            <div v-if="accessToken && data">
+            <div v-if="data">
                 <!-- todos -->
                 <div class="content-box">
-                    <h1 class="text-2xl font-bold">To-Dos</h1>
-                    <div v-if="data.todos.length > 0" class="inner-content-box divide-black divide-y-2">
-                        <div v-for="todo in data.todos">
-                            <div class="p-3 flow-root">
-                                <p class="float-left">{{ todo.name }}</p>
-                                <button class="float-right inline-flex items-center justify-center hover:bg-red-700 rounded-full" v-on:click="">
-                                    <svg class="h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-                                    </svg>
-                                </button>
+                    <h1 class="content-title">To-Dos</h1>
+                    <div v-if="data.todos.length > 0" class="space-y-3">
+                        <div class="flow-root text-sm">
+                            <button class="float-left btn-primary" v-on:click="updateData">Refresh</button>
+                            <p v-if="loading" class="float-right">Loading...</p>
+                        </div>
+                        <div class="inner-content-box divide-dark divide-y-2">
+                            <div v-for="todo in data.todos">
+                                <div class="p-3 flow-root bg-light hover:bg-light-alt text-dark">
+                                    <p class="float-left">{{ todo.name }}</p>
+                                    <button class="float-right inline-flex items-center justify-center hover:bg-alt hover:text-light-alt rounded-full" v-on:click="removeTodo(todo.id)">
+                                        <svg class="h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                                        </svg>
+                                    </button>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -41,16 +55,7 @@
                         <input v-model="currentTodo" class="flex-1 px-2" v-on:keypress="addTodo" placeholder="Add Task">
                         <button class="btn-primary rounded-none" @click="addTodo">+</button>
                     </div>
-                    <p v-if="loading" class="text-sm italic">Loading...</p>
                 </div>
-            </div>
-            <div v-if="error" class="mt-5 p-3 text-white rounded-md bg-red-500 flow-root">
-                <p class="float-left font-bold pr-4">Error: {{ error }}</p>
-                <button class="float-right inline-flex items-center justify-center bg-red-500 hover:bg-red-700 rounded-full" v-on:click="error = null">
-                    <svg class="h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-                    </svg>
-                </button>
             </div>
             <div v-if="!data" class="content-box text-center">
                 <p>Loading...</p>

@@ -53,6 +53,8 @@ createApp({
         },
 
         async updateData() {
+            this.loading = true;
+
             await fetch(window.location.origin + '/api/get_data', {
                 method: 'GET',
                 headers: {
@@ -68,6 +70,8 @@ createApp({
                     this.data = response;
                 }
             });
+
+            this.loading = false;
         },
 
         async addTodo(event) {
@@ -98,7 +102,11 @@ createApp({
             await this.updateData();
         
             this.loading = false;
-        }
+        },
+
+        async removeTodo(id) {
+            console.log(`removing ${id}`);
+        },
     }
 })
 .mount('#app');
