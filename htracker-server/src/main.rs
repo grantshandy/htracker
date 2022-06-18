@@ -1,7 +1,8 @@
-use actix_web::{middleware::Logger, App, HttpServer};
+use actix_web::{middleware::Logger, App, HttpResponse, HttpServer};
 use mongodb::{options::ClientOptions, Client, Database};
 
 mod auth;
+mod data;
 mod email;
 mod public;
 
@@ -9,7 +10,7 @@ pub const BASE_URL: &'static str = "http://localhost:8080";
 
 #[derive(Clone)]
 struct ServerData {
-    pub htracker_db: Database,
+    pub db: Database,
 }
 
 #[tokio::main]
@@ -21,8 +22,8 @@ async fn main() -> std::io::Result<()> {
         .unwrap();
     client_options.app_name = Some("htracker".to_string());
     let client = Client::with_options(client_options).unwrap();
-    let htracker_db = client.database("htracker");
-    let server_data = ServerData { htracker_db };
+    let db = client.database("htracker");
+    let server_data = ServerData { db };
 
     HttpServer::new(move || {
         App::new()
@@ -37,11 +38,25 @@ async fn main() -> std::io::Result<()> {
             .service(public::dashboard_js)
             .service(public::index_html)
             .service(public::index_js)
-            .service(auth::login)
-            .service(auth::register)
-            .service(auth::verify)
+            .service(public::tailwind_css)
+            // auth is the authentication and user
+            // management module of the server
+            .service(auth::login_auth)
+            .service(auth::register_account)
+            .service(auth::verify_account)
+            // these are the parts of the api
+            // that involve accessing user data
+            .service(data::add_todo)
     })
     .bind(("127.0.0.1", 8080))?
     .run()
     .await
+}
+
+pub fn bad_request_error(error: &str) -> HttpResponse {
+    HttpResponse::BadRequest().body(format!("{{\"error\":\"{error}\"}}"))
+}
+
+pub fn server_error(error: &str) -> HttpResponse {
+    HttpResponse::InternalServerError().body(format!("{{\"error\":\"{error}\"}}"))
 }

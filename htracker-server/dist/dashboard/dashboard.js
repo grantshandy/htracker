@@ -8,7 +8,7 @@ createApp({
     },
 
     mounted() {
-        this.secret = localStorage.getItem('secret');
+        this.secret = localStorage.getItem('accessToken');
 
         if (!this.secret) {
             window.location.href = '/login';
@@ -17,8 +17,8 @@ createApp({
 
     methods: {
         logout() {
-            localStorage.removeItem('secret');
-            window.location.href = '/login';
+            localStorage.removeItem('accessToken');
+            window.location.href = '/';
         },
     }
 })

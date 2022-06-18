@@ -16,3 +16,4 @@ tokio = { version = "1.19", features = ["full"] }
 mailchecker = "4.1"
 mailjet-rs = "0.2"
 log = "0.4.17"
+base64 = "0.13.0"

@@ -12,6 +12,9 @@ htracker validation
 Hello, NAME, click the link below to validate your account.
 ";
 
+const SENDER_EMAIL: &'static str = "validation@htracker.xyz";
+const SENDER_NAME: &'static str = "Htracker Account Validation";
+
 pub async fn send_validation_email(user_info: &IntermediateUserInfo) -> Option<String> {
     let client = Client::new(SendAPIVersion::V3, MAILJET_PUBLIC_KEY, MAILJET_SECRET_KEY);
 
@@ -23,9 +26,12 @@ pub async fn send_validation_email(user_info: &IntermediateUserInfo) -> Option<S
 
     // Create your a `Message` instance with the minimum required values
     let mut message = Message::new(
-        "validation@htracker.xyz",
-        "Htracker Validation",
-        Some("Validate Your Htracker Account".to_string()),
+        SENDER_EMAIL,
+        SENDER_NAME,
+        Some(format!(
+            "Hello, {}, Validate Your Htracker Account",
+            &user_info.username
+        )),
         Some(email_contents),
     );
 

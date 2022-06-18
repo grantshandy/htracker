@@ -3,17 +3,15 @@ const { createApp } = Vue
 createApp({
     data() {
         return {
-            secret: null,
+            accessToken: null,
         }
     },
 
     mounted() {
         console.log('running');
-        this.secret = localStorage.getItem('secret');
+        this.accessToken = localStorage.getItem('accessToken');
 
-        if (!this.secret) {
-            window.location.href = '/login';
-        } else {
+        if (this.accessToken) {
             window.location.href = '/dashboard';
         }
     }

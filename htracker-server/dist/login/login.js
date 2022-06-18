@@ -15,21 +15,16 @@ createApp({
             },
             error: null,
             info: null,
+            darkMode: false,
             registering: false,
-            darkmode: true,
         }
     },
 
     mounted() {
-        // update app secret and username from localstorage
-        this.secret = localStorage.getItem('secret');
+        // update app accessToken and username from localstorage
+        this.accessToken = localStorage.getItem('accessToken');
 
-        // enable dark mode if valid
-        if (localStorage.getItem('darkmode') == 'true') {
-            this.enableDarkMode();
-        } else if (localStorage.getItem('darkmode') == 'false') {
-            this.disableDarkMode();
-        } else if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        if (localStorage.getItem('darkMode') == 'true') {
             this.enableDarkMode();
         } else {
             this.disableDarkMode();
@@ -38,7 +33,6 @@ createApp({
 
     methods: {
         login() {
-            console.log('Logging in...');
             this.error = null;
             this.info = null;
 
@@ -62,8 +56,9 @@ createApp({
                     this.error = response.error;
                 } else {
                     if (response.valid) {
-                        this.setSecret(username, password);
-                        window.location.href = '/';
+                        console.log('sending to dashboard');
+                        this.setAccessToken(username, password);
+                        window.location.href = '/dashboard';
                     } else {
                         this.error = "Incorrect Username or Password";
                     }
@@ -124,22 +119,24 @@ createApp({
             });
         },
 
-        setSecret(username, password) {
-            localStorage.setItem('secret', btoa(`${username}:${password}`));
-        },
-
         enableDarkMode() {
+            this.darkMode = true;
+            localStorage.setItem('darkMode', 'true');
             DarkReader.enable({
                 brightness: 100,
                 contrast: 90,
                 sepia: 10
             });
-            localStorage.setItem('darkmode', 'true');
         },
 
-        disableDarkMode() {
+        disableDarkMode() {   
+            this.darkMode = false;
+            localStorage.setItem('darkMode', 'false');         
             DarkReader.disable();
-            localStorage.setItem('darkmode', 'false');
+        },
+
+        setAccessToken(username, password) {
+            localStorage.setItem('accessToken', btoa(`${username}:${password}`));
         },
     }
 })
