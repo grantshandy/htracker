@@ -28,7 +28,7 @@
     }
 
     .top-text {
-        @apply flow-root text-sm px-1 italic;
+        @apply flow-root text-sm px-1;
     }
 
     .error-box {

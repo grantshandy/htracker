@@ -11,10 +11,10 @@
   <div id="app" class="h-screen">
       <div class="page-box">
         <div class="top-text">
-          <button class="float-right hover:italic" v-if="darkMode" v-on:click="disableDarkMode">
+          <button class="float-right" v-if="darkMode" v-on:click="disableDarkMode">
               Switch to Light Mode
           </button>
-          <button class="float-right hover:italic" v-if="!darkMode" v-on:click="enableDarkMode">
+          <button class="float-right" v-if="!darkMode" v-on:click="enableDarkMode">
               Switch to Dark Mode
           </button>
       </div>

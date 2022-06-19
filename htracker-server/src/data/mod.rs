@@ -6,7 +6,7 @@ mod retrieve;
 mod todo;
 
 pub use retrieve::get_data;
-pub use todo::add_todo;
+pub use todo::{add_todo, remove_todo};
 
 use crate::server_error;
 

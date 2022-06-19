@@ -54,6 +54,7 @@ async fn main() -> std::io::Result<()> {
             // these are the parts of the api
             // that involve accessing user data
             .service(data::add_todo)
+            .service(data::remove_todo)
             .service(data::get_data)
     })
     .bind(("127.0.0.1", 8080))?

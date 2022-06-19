@@ -4,6 +4,7 @@ createApp({
     data() {
         return {
             accessToken: null,
+            username: null,
             data: null,
             darkMode: false,
             error: null,
@@ -18,6 +19,9 @@ createApp({
         if (!this.accessToken) {
             window.location.href = '/login';
         }
+
+        // set username from access token
+        this.username = atob(this.accessToken).split(':')[0];
 
         if (localStorage.getItem('darkMode') == 'true') {
             this.enableDarkMode();
@@ -95,17 +99,38 @@ createApp({
             .then(response => {
                 if (response.error) {
                     this.error = response.error;
+                } else {
+                    this.data.todos = response;
                 }
             });
 
             this.currentTodo = '';
-            await this.updateData();
-        
             this.loading = false;
         },
 
         async removeTodo(id) {
-            console.log(`removing ${id}`);
+            this.loading = true;
+
+            await fetch(window.location.origin + '/api/remove_todo', {
+                method: 'POST',
+                headers: {
+                    'Accept': 'application/json',
+                    'X-AuthToken': this.accessToken,
+                },
+                body: JSON.stringify({
+                    id,
+                }),
+            })
+            .then(response => response.json())
+            .then(response => {
+                if (response.error) {
+                    this.error = response.error;
+                } else {
+                    this.data.todos = response;
+                }
+            });
+
+            this.loading = false;
         },
     }
 })

@@ -23,42 +23,14 @@ pub async fn validate_auth_token(req: &HttpRequest) -> Result<Option<String>, Ht
         None => return Err(bad_request_error("must include token")),
     };
 
-    // turn token bytes into utf8 text
-    let auth_token_decoded = match base64::decode(auth_token.clone()) {
-        Ok(data) => match String::from_utf8(data) {
-            Ok(data) => data,
-            Err(_) => return Err(bad_request_error("token not formatted in utf8")),
-        },
-        Err(_) => return Err(bad_request_error("token not formatted in base64")),
-    };
-
-    let auth_token_text = match String::from_utf8(auth_token.as_bytes().to_vec()) {
+    // base64 token in utf8
+    let auth_token = match String::from_utf8(auth_token.as_bytes().to_vec()) {
         Ok(data) => data,
         Err(_) => return Err(bad_request_error("couldn't turn encoded token into utf8")),
     };
 
-    // split token at ':'
-    let auth_token_decoded_split = &auth_token_decoded.split(':').collect::<Vec<&str>>();
-
-    // get username before ':'
-    let username = match auth_token_decoded_split.get(0) {
-        Some(username) => username,
-        None => {
-            return Err(bad_request_error(
-                "token must be formatted like username:password",
-            ))
-        }
-    };
-
-    // get password after ':'
-    let password = match auth_token_decoded_split.get(1) {
-        Some(password) => password,
-        None => {
-            return Err(bad_request_error(
-                "token must be formatted like username:password",
-            ))
-        }
-    };
+    // username and password from auth token
+    let (username, password) = username_password_from_auth_token(&auth_token)?;
 
     // check to see if username and password are in our users database
     let server_data: &ServerData = req.app_data().unwrap();
@@ -76,7 +48,48 @@ pub async fn validate_auth_token(req: &HttpRequest) -> Result<Option<String>, Ht
         Err(err) => return Err(server_error(&format!("error accessing database: {err}"))),
     };
 
-    Ok(Some(auth_token_text))
+    Ok(Some(auth_token))
+}
+
+/// get username and password from utf8 base64 auth_token.
+pub fn username_password_from_auth_token<A: AsRef<str>>(
+    auth_token: A,
+) -> Result<(String, String), HttpResponse> {
+    let auth_token = match base64::decode(auth_token.as_ref()) {
+        Ok(auth_token) => match String::from_utf8(auth_token) {
+            Ok(auth_token) => auth_token,
+            Err(_) => return Err(bad_request_error("token not utf8")),
+        },
+        Err(_) => return Err(bad_request_error("token not base64")),
+    };
+
+    let split = auth_token.split(':').collect::<Vec<&str>>();
+
+    if split.len() > 2 {
+        return Err(bad_request_error(
+            "token should be formatted username:password",
+        ));
+    }
+
+    let username = match split.get(0) {
+        Some(username) => username.to_string(),
+        None => {
+            return Err(bad_request_error(
+                "token should be formatted username:password",
+            ))
+        }
+    };
+
+    let password = match split.get(1) {
+        Some(username) => username.to_string(),
+        None => {
+            return Err(bad_request_error(
+                "token should be formatted username:password",
+            ))
+        }
+    };
+
+    Ok((username, password))
 }
 
 pub fn gen_auth_key<A: AsRef<str>>(username: A, password: A) -> String {
