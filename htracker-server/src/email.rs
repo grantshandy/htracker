@@ -1,6 +1,7 @@
+use actix_web::HttpRequest;
 use mailjet_rs::{common::Recipient, v3::Message, Client, SendAPIVersion};
 
-use crate::{auth::IntermediateUserInfo, BASE_URL};
+use crate::{auth::IntermediateUserInfo, ServerData};
 
 const MAILJET_PUBLIC_KEY: &'static str = include_str!("../MAILJET_PUBLIC_KEY");
 const MAILJET_SECRET_KEY: &'static str = include_str!("../MAILJET_SECRET_KEY");
@@ -15,13 +16,19 @@ Hello, NAME, click the link below to validate your account.
 const SENDER_EMAIL: &'static str = "validation@htracker.xyz";
 const SENDER_NAME: &'static str = "Htracker Account Validation";
 
-pub async fn send_validation_email(user_info: &IntermediateUserInfo) -> Option<String> {
+pub async fn send_validation_email(
+    user_info: &IntermediateUserInfo,
+    req: &HttpRequest,
+) -> Option<String> {
+    let server_data: &ServerData = req.app_data().unwrap();
+    let base_url = &server_data.args.base_url;
+
     let client = Client::new(SendAPIVersion::V3, MAILJET_PUBLIC_KEY, MAILJET_SECRET_KEY);
 
     let mut email_contents = String::from(VALIDATION_EMAIL).replace("NAME", &user_info.username);
     email_contents.push_str(&format!(
         "{}/validate/{}",
-        BASE_URL, user_info.validation_string
+        base_url, user_info.validation_string
     ));
 
     // Create your a `Message` instance with the minimum required values

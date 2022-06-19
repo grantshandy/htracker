@@ -1,0 +1,8 @@
+[Unit]
+Description=Htracker HTTP Server
+
+[Service]
+ExecStart=/bin/bash /home/grant/htracker
+
+[Install]
+WantedBy=multi-user.target

@@ -118,7 +118,7 @@ pub async fn register_account(bytes: web::Bytes, req: HttpRequest) -> HttpRespon
     };
 
     // send verification email to user's inbox
-    if let Some(err) = email::send_validation_email(&intermediate_user_info).await {
+    if let Some(err) = email::send_validation_email(&intermediate_user_info, &req).await {
         return server_error(&format!("couldn't send email: {err}"));
     };
 
