@@ -59,10 +59,6 @@ createApp({
             });
         },
 
-        register() {
-            window.location.href = '/register';
-        },
-
         enableDarkMode() {
             this.darkMode = true;
             localStorage.setItem('darkMode', 'true');

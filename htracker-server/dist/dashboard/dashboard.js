@@ -115,7 +115,6 @@ createApp({
                 }
             });
 
-            this.currentTask = '';
             this.loading = false;
         },
 

@@ -13,7 +13,10 @@
     <div id="app">
         <div class="page-box">
             <div class="top-text">
-                <a class="float-left not-italic" href="/">Home</a>
+                <div class="float-left not-italic flex space-x-2">
+                    <a href="/">Home</a>
+                    <a href="/register">Register</a>
+                </div>
                 <button class="float-right" v-if="darkMode" v-on:click="disableDarkMode">
                     Switch to Light Mode
                 </button>
@@ -33,10 +36,7 @@
                         <input type="password" class="w-full input-primary" v-on:keypress="login" v-model="password">
                     </div>
                 </div>
-                <div class="flow-root">
-                    <button class="float-left btn-primary" v-on:click="login">Login</button>
-                    <button class="float-right btn-primary" v-on:click="register">Register</button>
-                </div>
+                <button class="btn-primary" v-on:click="login">Login</button>
             </div>
             <div v-if="error" class="error-box">
                 <p class="float-left font-bold pr-4">Error: {{ error }}</p>
