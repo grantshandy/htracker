@@ -11,7 +11,7 @@
 </head>
 <body>
     <div id="app">
-        <div class="page-box">
+        <div v-cloak class="page-box">
             <div v-if="error" class="error-box">
                 <p class="float-left font-bold pr-4">Error: {{ error }}</p>
                 <button class="float-right inline-flex items-center justify-center bg-error hover:bg-error-dark rounded-full" v-on:click="error = null">
@@ -21,30 +21,30 @@
                 </button>
             </div>
             <div class="top-text">
-                <div class="float-left flex space-x-2">
+                <div class="md:float-left flex space-x-2">
                     <button v-on:click="logout" class="font-bold">Logout</button>
                     <p v-if="username" class="">Username: {{ username }}</p>
                 </div>
-                <button class="float-right" v-if="darkMode" v-on:click="disableDarkMode">
+                <button class="md:float-right" v-if="darkMode" v-on:click="disableDarkMode">
                     Switch to Light Mode
                 </button>
-                <button class="float-right" v-if="!darkMode" v-on:click="enableDarkMode">
+                <button class="md:float-right" v-if="!darkMode" v-on:click="enableDarkMode">
                     Switch to Dark Mode
                 </button>
             </div>
-            <div v-if="data">
-                <div class="content-box">
+            <div class="content-box">
+                <div v-if="data.tasks" class="space-y-3">
                     <h1 class="content-title">Tasks</h1>
-                    <div v-if="data.todos.length > 0" class="space-y-3">
-                        <div class="flow-root text-sm">
-                            <button class="float-left btn-primary" v-on:click="updateData">Refresh</button>
-                            <p v-if="loading" class="float-right">Loading...</p>
-                        </div>
+                    <div class="flow-root text-sm">
+                        <button class="float-left btn-primary" v-on:click="updateTasks">Refresh</button>
+                        <p v-if="loading" class="float-right">Loading...</p>
+                    </div>
+                    <div v-if="data.tasks.length > 0">
                         <div class="inner-content-box divide-dark divide-y-2">
-                            <div v-for="todo in data.todos">
+                            <div v-for="task in data.tasks">
                                 <div class="p-3 flow-root bg-light hover:bg-light-alt text-dark">
-                                    <p class="float-left">{{ todo.name }}</p>
-                                    <button class="float-right inline-flex items-center justify-center hover:bg-alt hover:text-light-alt rounded-full" v-on:click="removeTodo(todo.id)">
+                                    <p class="float-left">{{ task.name }}</p>
+                                    <button class="float-right inline-flex items-center justify-center hover:bg-alt hover:text-light-alt rounded-full" v-on:click="removeTask(task)">
                                         <svg class="h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
                                         </svg>
@@ -54,13 +54,13 @@
                         </div>
                     </div>
                     <div class="inner-content-box flex">
-                        <input v-model="currentTodo" class="flex-1 px-2" v-on:keypress="addTodo" placeholder="Add Task">
-                        <button class="btn-primary rounded-none" @click="addTodo">+</button>
+                        <input v-model="currentTask" class="flex-1 px-2" v-on:keypress="addTask" placeholder="Add Task">
+                        <button class="btn-primary rounded-none" @click="addTask">+</button>
                     </div>
                 </div>
-            </div>
-            <div v-if="!data" class="content-box text-center">
-                <p>Loading...</p>
+                <div v-else class="text-center">
+                    <p>Loading Tasks...</p>
+                </div>
             </div>
         </div>
     </div>

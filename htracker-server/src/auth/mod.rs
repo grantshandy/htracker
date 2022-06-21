@@ -3,7 +3,7 @@ mod validate;
 
 use actix_web::{get, HttpRequest, HttpResponse};
 use mongodb::bson::doc;
-pub use register::{register_account, IntermediateUserInfo};
+pub use register::{register_account, NewUserInfo};
 use serde::{Deserialize, Serialize};
 pub use validate::validate_account;
 
@@ -14,6 +14,16 @@ pub struct UserInfo {
     pub username: String,
     pub password: String,
     pub email: String,
+}
+
+impl UserInfo {
+    pub fn from_new(new: &NewUserInfo) -> Self {
+        Self {
+            username: new.username.clone(),
+            password: new.password.clone(),
+            email: new.email.clone(),
+        }
+    }
 }
 
 pub async fn validate_auth_token(req: &HttpRequest) -> Result<Option<String>, HttpResponse> {

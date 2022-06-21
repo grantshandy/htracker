@@ -5,10 +5,12 @@ createApp({
         return {
             accessToken: null,
             username: null,
-            data: null,
+            data: {
+                tasks: null,
+            },
             darkMode: false,
             error: null,
-            currentTodo: null,
+            currentTask: '',
             loading: false,
         }
     },
@@ -31,10 +33,11 @@ createApp({
     },
 
     async mounted() {
-        await this.updateData();
+        await this.updateTasks();
     },
 
     methods: {
+        // logout of current site instance
         logout() {
             localStorage.removeItem('accessToken');
             window.location.href = '/';
@@ -56,10 +59,11 @@ createApp({
             DarkReader.disable();
         },
 
-        async updateData() {
+        // update site's task state from server
+        async updateTasks() {
             this.loading = true;
 
-            await fetch(window.location.origin + '/api/get_data', {
+            await fetch(window.location.origin + '/api/get_tasks', {
                 method: 'GET',
                 headers: {
                     'Accept': 'application/json',
@@ -71,28 +75,35 @@ createApp({
                 if (response.error) {
                     this.error = response.error;
                 } else {
-                    this.data = response;
+                    this.data.tasks = response;
                 }
             });
 
             this.loading = false;
         },
 
-        async addTodo(event) {
-            if ((event && event.key && event.key != 'Enter') || this.currentTodo == '' || !this.currentTodo) {
+        // add a task to the server and site
+        async addTask(event) {
+            if ((event && event.key && event.key != 'Enter') || this.currentTask == '' || !this.currentTask) {
                 return;
             }
 
             this.loading = true;
 
-            await fetch(window.location.origin + '/api/add_todo', {
+            let currentTask = this.currentTask;
+            this.currentTask = '';
+
+            // insert temporary task to site state to appear more responsive
+            this.data.tasks.push({ "name": currentTask });
+
+            await fetch(window.location.origin + '/api/add_task', {
                 method: 'POST',
                 headers: {
                     'Accept': 'application/json',
                     'X-AuthToken': this.accessToken,
                 },
                 body: JSON.stringify({
-                    name: this.currentTodo,
+                    name: currentTask,
                 }),
             })
             .then(response => response.json())
@@ -100,25 +111,32 @@ createApp({
                 if (response.error) {
                     this.error = response.error;
                 } else {
-                    this.data.todos = response;
+                    this.data.tasks = response;
                 }
             });
 
-            this.currentTodo = '';
+            this.currentTask = '';
             this.loading = false;
         },
 
-        async removeTodo(id) {
+        // remove a task from the sever and site
+        async removeTask(task) {
             this.loading = true;
 
-            await fetch(window.location.origin + '/api/remove_todo', {
+            // remove task on client state before it's officially removed to make it appear more responsive.
+            let taskIndex = this.data.tasks.indexOf(task);
+            if (taskIndex > -1) {
+                this.data.tasks.splice(taskIndex, 1);
+            }
+
+            await fetch(window.location.origin + '/api/remove_task', {
                 method: 'POST',
                 headers: {
                     'Accept': 'application/json',
                     'X-AuthToken': this.accessToken,
                 },
                 body: JSON.stringify({
-                    id,
+                    id: task.id,
                 }),
             })
             .then(response => response.json())
@@ -126,7 +144,7 @@ createApp({
                 if (response.error) {
                     this.error = response.error;
                 } else {
-                    this.data.todos = response;
+                    this.data.tasks = response;
                 }
             });
 

@@ -1,36 +1,16 @@
 use actix_web::HttpResponse;
 use mongodb::{bson::doc, Database};
+use rand::{distributions::Alphanumeric, Rng};
 use serde::{Deserialize, Serialize};
 
-mod retrieve;
-mod todo;
+mod tasks;
 
-pub use retrieve::get_data;
-pub use todo::{add_todo, remove_todo};
+pub use tasks::{add_task, get_tasks, remove_task};
 
 use crate::server_error;
 
-use self::todo::InternalTodo;
-
-#[derive(Serialize, Deserialize, Debug, Clone)]
-pub struct UserData {
-    pub auth_token: String,
-    pub todos: Vec<InternalTodo>,
-}
-
-impl UserData {
-    pub fn new<A: AsRef<str>>(auth_token: A) -> Self {
-        Self {
-            auth_token: auth_token.as_ref().to_string(),
-            todos: Vec::new(),
-        }
-    }
-}
-
-async fn user_data_from_auth_token(
-    auth_token: &str,
-    db: &Database,
-) -> Result<UserData, HttpResponse> {
+/// get user data from auth token and db
+async fn user_data(auth_token: &str, db: &Database) -> Result<UserData, HttpResponse> {
     match db
         .collection::<UserData>("userData")
         .find_one(doc! { "auth_token": auth_token }, None)
@@ -38,10 +18,50 @@ async fn user_data_from_auth_token(
     {
         Ok(user_data) => match user_data {
             Some(user_data) => Ok(user_data),
-            None => Err(server_error(
-                "couldn't access user's userData in internal database",
-            )),
+            None => Err(server_error("couldn't access userData")),
         },
-        Err(_) => return Err(server_error("couldn't access internal database")),
+        Err(_) => return Err(server_error("couldn't access database")),
+    }
+}
+
+/// struct for the user's entire dataset
+#[derive(Serialize, Deserialize, Debug, Clone)]
+pub struct UserData {
+    pub auth_token: String,
+    pub tasks: Vec<Task>,
+}
+
+impl UserData {
+    /// initialize user's userdata
+    pub fn new<A: AsRef<str>>(auth_token: A) -> Self {
+        Self {
+            auth_token: auth_token.as_ref().to_string(),
+            tasks: Vec::new(),
+        }
+    }
+}
+
+/// task stored in the database
+#[derive(Serialize, Deserialize, Debug, Clone)]
+pub struct Task {
+    // name that the user sees for the task
+    pub name: String,
+    // 10 char alphanumeric string used for identification.
+    // used so duplicate tasks can be created.
+    pub id: String,
+}
+
+impl Task {
+    pub fn new<A: AsRef<str>>(name: A) -> Self {
+        let id = rand::thread_rng()
+            .sample_iter(&Alphanumeric)
+            .take(10)
+            .map(char::from)
+            .collect();
+
+        Self {
+            name: name.as_ref().to_string(),
+            id,
+        }
     }
 }

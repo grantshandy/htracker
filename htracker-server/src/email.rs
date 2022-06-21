@@ -1,7 +1,7 @@
 use actix_web::HttpRequest;
 use mailjet_rs::{common::Recipient, v3::Message, Client, SendAPIVersion};
 
-use crate::{auth::IntermediateUserInfo, ServerData};
+use crate::{auth::NewUserInfo, ServerData};
 
 const MAILJET_PUBLIC_KEY: &'static str = include_str!("../MAILJET_PUBLIC_KEY");
 const MAILJET_SECRET_KEY: &'static str = include_str!("../MAILJET_SECRET_KEY");
@@ -16,10 +16,7 @@ Hello, NAME, click the link below to validate your account.
 const SENDER_EMAIL: &'static str = "validation@htracker.xyz";
 const SENDER_NAME: &'static str = "Htracker Account Validation";
 
-pub async fn send_validation_email(
-    user_info: &IntermediateUserInfo,
-    req: &HttpRequest,
-) -> Option<String> {
+pub async fn send_validation_email(user_info: &NewUserInfo, req: &HttpRequest) -> Option<String> {
     let server_data: &ServerData = req.app_data().unwrap();
     let base_url = &server_data.args.base_url;
 
@@ -36,7 +33,7 @@ pub async fn send_validation_email(
         SENDER_EMAIL,
         SENDER_NAME,
         Some(format!(
-            "Hello, {}, Validate Your Htracker Account",
+            "{}, Validate Your Htracker Account",
             &user_info.username
         )),
         Some(email_contents),

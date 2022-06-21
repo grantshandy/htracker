@@ -17,8 +17,10 @@
  - Headers: `X-AuthToken: [username:password in base64]`.
  - Response: `{"error":"[ERROR]"}` or `{"valid":[bool]}`.
 
+
+## Tasks
  ```
-/api/get_data
+/api/get_tasks
 ```
  - Description: Retrieve all user data.
  - Type: GET
@@ -26,18 +28,18 @@
  - Response: `{"auth_token":"[AUTH_TOKEN]","todos":[{"name":"[NAME]"}...]}`.
 
 ```
-/api/add_todo
+/api/add_task
 ```
- - Description: add a todo task
+ - Description: remove a task
  - Type: POST
  - Headers: `X-AuthToken: [username:password in base64]`.
  - Request Body: `{"name":"[NAME]"}`.
  - Response: `{"error":"[ERROR]"}` or `{"todos":[{"name":"[NAME]"}...]}`.
 
 ```
-/api/remove_todo
+/api/remove_task
 ```
- - Description: add a todo task
+ - Description: add a task
  - Type: POST
  - Headers: `X-AuthToken: [username:password in base64]`.
  - Request Body: `{"id":"[ID]"}`.

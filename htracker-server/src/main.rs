@@ -1,4 +1,4 @@
-use std::{io::BufReader, fs::File};
+use std::{fs::File, io::BufReader};
 
 use actix_web::{middleware::Logger, App, HttpResponse, HttpServer};
 use argh::FromArgs;
@@ -15,20 +15,20 @@ mod public;
 /// Htracker server
 struct HtrackerArgs {
     /// the url where this is being hosted
-    #[argh(option, default = "String::from(\"http://localhost:8080\")")]
+    #[argh(option)]
     base_url: String,
     /// ip address to serve on
-    #[argh(option, default = "String::from(\"127.0.0.1\")")]
+    #[argh(option)]
     ip: String,
     /// port to serve on
-    #[argh(option, default = "8080")]
+    #[argh(option)]
     port: u16,
     /// cert to use
-    #[argh(option, default = "String::from(\"/etc/letsencrypt/live/htracker.xyz/fullchain.pem\")")]
-    cert: String,
+    #[argh(option)]
+    cert: Option<String>,
     /// key to use
-    #[argh(option, default = "String::from(\"/etc/letsencrypt/live/htracker.xyz/privkey.pem\")")]
-    key: String,
+    #[argh(option)]
+    key: Option<String>,
 }
 
 #[derive(Clone)]
@@ -40,11 +40,14 @@ struct ServerData {
 #[tokio::main]
 async fn main() -> std::io::Result<()> {
     // init logger
-    pretty_env_logger::init();
+    pretty_env_logger::try_init_custom_env("debug").unwrap();
 
     // init args
     let args: HtrackerArgs = argh::from_env();
-    println!("starting http server on {}:{}", args.ip, args.port);
+    let ip = &args.ip;
+    let port = &args.port;
+
+    println!("starting http server on {ip}:{port}");
 
     // connect to mongodb
     let mut client_options = ClientOptions::parse("mongodb://localhost:27017")
@@ -60,10 +63,8 @@ async fn main() -> std::io::Result<()> {
         args: args.clone(),
     };
 
-    let config = rustls_config(&args);
-
     // start http server
-    HttpServer::new(move || {
+    let server = HttpServer::new(move || {
         App::new()
             .wrap(Logger::default())
             .app_data(server_data.clone())
@@ -91,14 +92,38 @@ async fn main() -> std::io::Result<()> {
             .service(auth::validate_account)
             // these are the parts of the api
             // that involve accessing user data
-            .service(data::add_todo)
-            .service(data::remove_todo)
-            .service(data::get_data)
-    })
-    .bind_rustls(&format!("{}:{}", &args.ip, &args.port), config)?
-    // .bind_rustls("127.0.0.1:8443", config)?
-    .run()
-    .await
+            .service(data::add_task)
+            .service(data::remove_task)
+            .service(data::get_tasks)
+    });
+
+    if let Some(cert) = &args.cert {
+        println!("using cert at {cert}");
+        if let Some(key) = &args.key {
+            println!("using key at {key}");
+            match server
+                .bind_rustls(&format!("{ip}:{port}"), rustls_config(cert, key))?
+                .run()
+                .await
+            {
+                Ok(_) => (),
+                Err(err) => {
+                    eprintln!("unable to start server, error: {err}");
+                    std::process::exit(1);
+                }
+            }
+        }
+    } else {
+        match server.bind(&format!("{ip}:{port}"))?.run().await {
+            Ok(_) => (),
+            Err(err) => {
+                eprintln!("unable to start server, error: {err}");
+                std::process::exit(1);
+            }
+        }
+    }
+
+    Ok(())
 }
 
 pub fn bad_request_error(error: &str) -> HttpResponse {
@@ -109,18 +134,18 @@ pub fn server_error(error: &str) -> HttpResponse {
     HttpResponse::InternalServerError().body(format!("{{\"error\":\"{error}\"}}"))
 }
 
-fn rustls_config(args: &HtrackerArgs) -> ServerConfig {
+fn rustls_config<A: AsRef<str>>(cert: A, key: A) -> ServerConfig {
+    let cert = cert.as_ref();
+    let key = key.as_ref();
+
     // init server config builder with safe defaults
     let config = ServerConfig::builder()
         .with_safe_defaults()
         .with_no_client_auth();
 
-    println!("getting cert at {}", &args.cert);
-    println!("getting key at {}", &args.key);
-
     // load TLS key/cert files
-    let cert_file = &mut BufReader::new(File::open(&args.cert).unwrap());
-    let key_file = &mut BufReader::new(File::open(&args.key).unwrap());
+    let cert_file = &mut BufReader::new(File::open(cert).unwrap());
+    let key_file = &mut BufReader::new(File::open(key).unwrap());
 
     // convert files to key/cert objects
     let cert_chain = certs(cert_file)
