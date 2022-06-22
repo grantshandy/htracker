@@ -1,5 +1,9 @@
-use std::{fs::File, io::BufReader};
+use std::{fs::File, io::BufReader, time::Duration};
 
+use actix_extensible_rate_limit::{
+    backend::{memory::InMemoryBackend, SimpleInputFunctionBuilder},
+    RateLimiter,
+};
 use actix_web::{middleware::Logger, App, HttpResponse, HttpServer};
 use argh::FromArgs;
 use mongodb::{options::ClientOptions, Client, Database};
@@ -40,7 +44,7 @@ struct ServerData {
 #[tokio::main]
 async fn main() -> std::io::Result<()> {
     // init logger
-    pretty_env_logger::try_init_custom_env("debug").unwrap();
+    pretty_env_logger::init();
 
     // init args
     let args: HtrackerArgs = argh::from_env();
@@ -65,8 +69,19 @@ async fn main() -> std::io::Result<()> {
 
     // start http server
     let server = HttpServer::new(move || {
+        // init rate limiter
+        let rate_limit_backend = InMemoryBackend::builder().build();
+        let rate_limit_input = SimpleInputFunctionBuilder::new(Duration::from_secs(60), 50)
+            .real_ip_key()
+            .build();
+
+        let rate_limiter = RateLimiter::builder(rate_limit_backend, rate_limit_input)
+            .add_headers()
+            .build();
+
         App::new()
             .wrap(Logger::default())
+            .wrap(rate_limiter)
             .app_data(server_data.clone())
             // these are all their individual services
             // instead of accessing a directory because

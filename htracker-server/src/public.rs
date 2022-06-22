@@ -16,21 +16,10 @@ const INDEX_JS: &'static str = include_str!("../web/index.js");
 const TAILWIND: &'static str = include_str!("../web/tailwind.css");
 
 lazy_static! {
-    static ref LOGIN: String = {
-        LOGIN_HTML.replace("INSERT_SCRIPT", LOGIN_JS)
-    };
-
-    static ref REGISTER: String = {
-        REGISTER_HTML.replace("INSERT_SCRIPT", REGISTER_JS)
-    };
-
-    static ref DASHBOARD: String = {
-        DASHBOARD_HTML.replace("INSERT_SCRIPT", DASHBOARD_JS)
-    };
-
-    static ref INDEX: String = {
-        INDEX_HTML.replace("INSERT_SCRIPT", INDEX_JS)
-    };
+    static ref LOGIN: String = { LOGIN_HTML.replace("INSERT_SCRIPT", LOGIN_JS) };
+    static ref REGISTER: String = { REGISTER_HTML.replace("INSERT_SCRIPT", REGISTER_JS) };
+    static ref DASHBOARD: String = { DASHBOARD_HTML.replace("INSERT_SCRIPT", DASHBOARD_JS) };
+    static ref INDEX: String = { INDEX_HTML.replace("INSERT_SCRIPT", INDEX_JS) };
 }
 
 #[get("/login")]
