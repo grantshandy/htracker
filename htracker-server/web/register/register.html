@@ -13,10 +13,7 @@
     <div id="app">
         <div class="page-box">
             <div class="top-text">
-                <div class="float-left not-italic flex space-x-2">
-                    <a href="/">Home</a>
-                    <a href="/login">Login</a>
-                </div>
+                <a class="float-left not-italic" href="/">Home</a>
                 <button class="float-right" v-if="darkMode" v-on:click="disableDarkMode">
                     Switch to Light Mode
                 </button>
@@ -48,7 +45,10 @@
                         <p v-if="password != password_confirm" class="text-sm italic">Passwords must match.</p>
                     </div>
                 </div>
-                <button class="btn-primary" v-on:click="register">Submit</button>
+                <div class="flow-root">
+                    <button class="float-left btn-primary" v-on:click="register">Submit</button>
+                    <a class="float-right align-bottom" href="/login">Login Instead</a>
+                </div>
             </div>
             <div v-if="info" class="mt-5 p-3 text-light rounded-md bg-dark flow-root">
                 <p class="float-left font-bold pr-4">Info: {{ info }}</p>
@@ -68,6 +68,8 @@
             </div>
         </div>
     </div>
-    <script src="register.js"></script>
+    <script>
+        INSERT_SCRIPT
+    </script>
 </body>
 </html>

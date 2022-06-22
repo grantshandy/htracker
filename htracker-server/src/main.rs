@@ -71,20 +71,11 @@ async fn main() -> std::io::Result<()> {
             // these are all their individual services
             // instead of accessing a directory because
             // I want the binary to be self contained
-            // login page
-            .service(public::login_html)
-            .service(public::login_js)
-            // register page
-            .service(public::register_html)
-            .service(public::register_js)
-            // dashboard page
-            .service(public::dashboard_html)
-            .service(public::dashboard_js)
-            // html page
-            .service(public::index_html)
-            .service(public::index_js)
-            // generated tailwind css page
-            .service(public::tailwind_css)
+            .service(public::index)
+            .service(public::login)
+            .service(public::register)
+            .service(public::dashboard)
+            .service(public::tailwind)
             // auth is the authentication and user
             // management module of the server
             .service(auth::auth)
