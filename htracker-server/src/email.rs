@@ -3,8 +3,8 @@ use mailjet_rs::{common::Recipient, v3::Message, Client, SendAPIVersion};
 
 use crate::{auth::NewUserInfo, ServerData};
 
-const MAILJET_PUBLIC_KEY: &'static str = include_str!("../MAILJET_PUBLIC_KEY");
-const MAILJET_SECRET_KEY: &'static str = include_str!("../MAILJET_SECRET_KEY");
+const MAILJET_PUBLIC_KEY: &'static str = include_str!("../res/MAILJET_PUBLIC_KEY");
+const MAILJET_SECRET_KEY: &'static str = include_str!("../res/MAILJET_SECRET_KEY");
 
 const VALIDATION_EMAIL: &'static str = "----------------------------------
 htracker validation

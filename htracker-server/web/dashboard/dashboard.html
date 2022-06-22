@@ -32,32 +32,45 @@
                     Switch to Dark Mode
                 </button>
             </div>
-            <div class="content-box">
-                <div v-if="data.tasks" class="space-y-3">
-                    <h1 class="content-title">Tasks</h1>
-                    <div class="flow-root text-sm">
-                        <button class="float-left btn-primary" v-on:click="updateTasks">Refresh</button>
-                        <p v-if="loading" class="float-right">Loading...</p>
-                    </div>
-                    <div v-if="data.tasks.length > 0" class="inner-content-box divide-dark divide-y-2">
-                        <div v-for="task in data.tasks">
-                            <div class="p-3 flow-root bg-light hover:bg-light-alt text-dark">
-                                <p class="float-left">{{ task.name }}</p>
-                                <button class="float-right inline-flex items-center justify-center hover:bg-alt hover:text-light-alt rounded-full" v-on:click="removeTask(task)">
-                                    <svg class="h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-                                    </svg>
-                                </button>
+            <div class="space-y-4">
+                <!-- tasks -->
+                <div class="content-box">
+                    <div v-if="data.tasks" class="space-y-3">
+                        <h1 class="content-title">Tasks</h1>
+                        <div class="flow-root text-sm">
+                            <button class="float-left btn-primary" v-on:click="updateTasks">Refresh</button>
+                            <p v-if="loading" class="float-right">Loading...</p>
+                        </div>
+                        <div v-if="data.tasks.length > 0" class="inner-content-box divide-dark divide-y-2">
+                            <div v-for="task in data.tasks">
+                                <div class="p-3 flow-root bg-light hover:bg-light-alt text-dark">
+                                    <p class="float-left">{{ task.name }}</p>
+                                    <button class="float-right inline-flex items-center justify-center hover:bg-alt hover:text-light-alt rounded-full" v-on:click="removeTask(task)">
+                                        <svg class="h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                                        </svg>
+                                    </button>
+                                </div>
                             </div>
                         </div>
+                        <div class="inner-content-box flex">
+                            <input v-model="currentTask" class="flex-1 px-2" v-on:keypress="addTask" placeholder="Add Task">
+                            <button class="btn-primary rounded-none" @click="addTask">+</button>
+                        </div>
                     </div>
-                    <div class="inner-content-box flex">
-                        <input v-model="currentTask" class="flex-1 px-2" v-on:keypress="addTask" placeholder="Add Task">
-                        <button class="btn-primary rounded-none" @click="addTask">+</button>
+                    <div v-else class="text-center">
+                        <p>Loading Tasks...</p>
                     </div>
                 </div>
-                <div v-else class="text-center">
-                    <p>Loading Tasks...</p>
+                <!-- quotes -->
+                <div class="content-box">
+                    <div v-if="quote">
+                        <p class="font-semibold">"{{ quote.text }}"</p>
+                        <p class="text-right text-sm">-{{ quote.author }}</p>
+                    </div>
+                    <div v-else>
+                        <p class="text-center">Loading Quote...</p>
+                    </div>
                 </div>
             </div>
         </div>

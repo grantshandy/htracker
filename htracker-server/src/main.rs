@@ -14,6 +14,7 @@ mod auth;
 mod data;
 mod email;
 mod public;
+mod quote;
 
 #[derive(FromArgs, Clone)]
 /// Htracker server
@@ -44,7 +45,7 @@ struct ServerData {
 #[tokio::main]
 async fn main() -> std::io::Result<()> {
     // init logger
-    pretty_env_logger::init();
+    pretty_env_logger::init_custom_env("info");
 
     // init args
     let args: HtrackerArgs = argh::from_env();
@@ -91,6 +92,8 @@ async fn main() -> std::io::Result<()> {
             .service(public::register)
             .service(public::dashboard)
             .service(public::tailwind)
+            // serve quotes
+            .service(quote::quote)
             // auth is the authentication and user
             // management module of the server
             .service(auth::auth)
@@ -133,11 +136,11 @@ async fn main() -> std::io::Result<()> {
 }
 
 pub fn bad_request_error(error: &str) -> HttpResponse {
-    HttpResponse::BadRequest().body(format!("{{\"error\":\"{error}\"}}"))
+    HttpResponse::BadRequest().json(error)
 }
 
 pub fn server_error(error: &str) -> HttpResponse {
-    HttpResponse::InternalServerError().body(format!("{{\"error\":\"{error}\"}}"))
+    HttpResponse::InternalServerError().json(error)
 }
 
 fn rustls_config<A: AsRef<str>>(cert: A, key: A) -> ServerConfig {
@@ -150,8 +153,8 @@ fn rustls_config<A: AsRef<str>>(cert: A, key: A) -> ServerConfig {
         .with_no_client_auth();
 
     // load TLS key/cert files
-    let cert_file = &mut BufReader::new(File::open(cert).unwrap());
-    let key_file = &mut BufReader::new(File::open(key).unwrap());
+    let cert_file = &mut BufReader::new(File::open(cert).expect("couldn't find cert"));
+    let key_file = &mut BufReader::new(File::open(key).expect("couldn't find key"));
 
     // convert files to key/cert objects
     let cert_chain = certs(cert_file)

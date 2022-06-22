@@ -108,7 +108,7 @@ pub fn gen_auth_key<A: AsRef<str>>(username: A, password: A) -> String {
 
 #[get("/api/auth")]
 pub async fn auth(req: HttpRequest) -> HttpResponse {
-    let res = match validate_auth_token(&req).await {
+    let valid = match validate_auth_token(&req).await {
         Ok(res) => match res {
             Some(_) => true,
             None => false,
@@ -117,5 +117,5 @@ pub async fn auth(req: HttpRequest) -> HttpResponse {
     };
 
     // another use of manual json formatting
-    HttpResponse::Ok().body(format!("{{\"valid\":{res}}}"))
+    HttpResponse::Ok().body(format!("{{\"valid\":\"{valid}\"}}"))
 }

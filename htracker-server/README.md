@@ -1,6 +1,6 @@
-# htracker server and website
+# API Docs
 
-## API Docs
+## Auth
 ```
 /api/register
 ```
@@ -17,15 +17,22 @@
  - Headers: `X-AuthToken: [username:password in base64]`.
  - Response: `{"error":"[ERROR]"}` or `{"valid":[bool]}`.
 
+## Quotes
+```
+/api/quote
+```
+ - Description: Get a random inspirational quote.
+ - Type: GET
+ - Response: `{"quote":"[QUOTE]","author":"[AUTHOR]"}`.
 
-## Tasks
+### Tasks
  ```
 /api/get_tasks
 ```
- - Description: Retrieve all user data.
+ - Description: Retrieve all user tasks.
  - Type: GET
  - Headers: `X-AuthToken: [username:password in base64]`.
- - Response: `{"auth_token":"[AUTH_TOKEN]","todos":[{"name":"[NAME]"}...]}`.
+ - Response: `{"auth_token":"[AUTH_TOKEN]","todos":[{"name":"[NAME]","id":"[ID]"}...]}`.
 
 ```
 /api/add_task
@@ -34,7 +41,7 @@
  - Type: POST
  - Headers: `X-AuthToken: [username:password in base64]`.
  - Request Body: `{"name":"[NAME]"}`.
- - Response: `{"error":"[ERROR]"}` or `{"todos":[{"name":"[NAME]"}...]}`.
+ - Response: `{"error":"[ERROR]"}` or `{"auth_token":"[AUTH_TOKEN]","todos":[{"name":"[NAME]","id":"[ID]"}...]}`.
 
 ```
 /api/remove_task
@@ -43,4 +50,4 @@
  - Type: POST
  - Headers: `X-AuthToken: [username:password in base64]`.
  - Request Body: `{"id":"[ID]"}`.
- - Response: `{"error":"[ERROR]"}` or `{"todos":[{"name":"[NAME]"}...]}`.
+ - Response: `{"error":"[ERROR]"}` or `{"auth_token":"[AUTH_TOKEN]","todos":[{"name":"[NAME]","id":"[ID]"}...]}`.

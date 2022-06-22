@@ -11,6 +11,7 @@ createApp({
             darkMode: false,
             error: null,
             currentTask: '',
+            quote: null,
             loading: false,
         }
     },
@@ -34,6 +35,7 @@ createApp({
 
     async mounted() {
         await this.updateTasks();
+        await this.updateQuote();
     },
 
     methods: {
@@ -78,6 +80,23 @@ createApp({
                     this.data.tasks = response;
                 }
             });
+
+            this.loading = false;
+        },
+
+        // update site's QOD
+        async updateQuote() {
+            this.loading = true;
+
+            await fetch(window.location.origin + '/api/quote', {
+                method: 'GET',
+                headers: {
+                    'Accept': 'application/json',
+                    'X-AuthToken': this.accessToken,
+                },
+            })
+            .then(response => response.json())
+            .then(response => this.quote = response);
 
             this.loading = false;
         },

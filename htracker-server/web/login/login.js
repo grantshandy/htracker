@@ -36,6 +36,8 @@ createApp({
 
             let username = this.username;
             let password = this.password;
+
+            console.log(this.genAccessToken(username, password));
             
             fetch(window.location.origin + '/api/auth', {
                 method: 'GET',
