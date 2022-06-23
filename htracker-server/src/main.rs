@@ -9,6 +9,7 @@ use argh::FromArgs;
 use mongodb::{options::ClientOptions, Client, Database};
 use rustls::{Certificate, PrivateKey, ServerConfig};
 use rustls_pemfile::{certs, pkcs8_private_keys};
+use actix_web_lab::middleware::RedirectHttps;
 
 mod auth;
 mod data;
@@ -68,8 +69,10 @@ async fn main() -> std::io::Result<()> {
         args: args.clone(),
     };
 
+    let port_clone = port.clone();
+
     // start http server
-    let server = HttpServer::new(move || {
+    let mut server = HttpServer::new(move || {
         // init rate limiter
         let rate_limit_backend = InMemoryBackend::builder().build();
         let rate_limit_input = SimpleInputFunctionBuilder::new(Duration::from_secs(60), 50)
@@ -82,6 +85,7 @@ async fn main() -> std::io::Result<()> {
 
         App::new()
             .wrap(Logger::default())
+            .wrap(RedirectHttps::default().to_port(port_clone))
             .wrap(rate_limiter)
             .app_data(server_data.clone())
             // these are all their individual services
@@ -110,27 +114,19 @@ async fn main() -> std::io::Result<()> {
         println!("using cert at {cert}");
         if let Some(key) = &args.key {
             println!("using key at {key}");
-            match server
-                .bind_rustls(&format!("{ip}:{port}"), rustls_config(cert, key))?
-                .run()
-                .await
-            {
-                Ok(_) => (),
-                Err(err) => {
-                    eprintln!("unable to start server, error: {err}");
-                    std::process::exit(1);
-                }
-            }
+            server = server.bind_rustls(&format!("{ip}:{port}"), rustls_config(cert, key))?
         }
     } else {
-        match server.bind(&format!("{ip}:{port}"))?.run().await {
-            Ok(_) => (),
-            Err(err) => {
-                eprintln!("unable to start server, error: {err}");
-                std::process::exit(1);
-            }
-        }
+        server = server.bind(&format!("{ip}:{port}"))?
     }
+
+    match server.run().await {
+        Ok(_) => (),
+        Err(err) => {
+            eprintln!("unable to start server, error: {err}");
+            std::process::exit(1);
+        }
+    };
 
     Ok(())
 }

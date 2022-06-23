@@ -1,15 +1,26 @@
 use actix_web::{get, post, web, HttpRequest, HttpResponse};
-use mongodb::bson::doc;
+use mongodb::bson::{self, doc};
 use serde::{Deserialize, Serialize};
 
 use crate::{auth, bad_request_error, data::UserData, server_error, ServerData};
 
-use super::{user_data, Task};
+use super::{gen_task_id, user_data, Task};
 
 // task that the client sends when creating a new one
 #[derive(Serialize, Deserialize, Clone)]
 struct TaskInsertion {
     pub name: String,
+    pub description: Option<String>,
+}
+
+impl TaskInsertion {
+    pub fn to_task(&self) -> Task {
+        Task {
+            name: self.name.clone(),
+            description: self.description.clone(),
+            id: gen_task_id(),
+        }
+    }
 }
 
 #[post("/api/add_task")]
@@ -24,7 +35,7 @@ pub async fn add_task(bytes: web::Bytes, req: HttpRequest) -> HttpResponse {
     };
 
     // serialize todo data
-    let task_insertion: TaskInsertion = match serde_json::from_slice(&bytes) {
+    let task: TaskInsertion = match serde_json::from_slice(&bytes) {
         Ok(json) => json,
         Err(_) => return bad_request_error("bad data formatting"),
     };
@@ -34,14 +45,14 @@ pub async fn add_task(bytes: web::Bytes, req: HttpRequest) -> HttpResponse {
     let db = &server_data.db;
 
     // create new internal todo with id
-    let task = Task::new(task_insertion.name);
+    let task = task.to_task();
 
     // replace update db
     if db
         .collection::<UserData>("userData")
         .find_one_and_update(
             doc! { "auth_token": &auth_token },
-            doc! {"$addToSet" : {"tasks" : {"name" : task.name, "id" : task.id }}},
+            doc! {"$addToSet" : {"tasks" : bson::to_bson(&task).unwrap()}},
             None,
         )
         .await

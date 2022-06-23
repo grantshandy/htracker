@@ -1,9 +1,9 @@
-use actix_web::{get, HttpResponse, HttpRequest};
+use actix_web::{get, HttpRequest, HttpResponse};
 use lazy_static::lazy_static;
 use rand::seq::SliceRandom;
 use serde::{Deserialize, Serialize};
 
-use crate::{bad_request_error, auth};
+use crate::{auth, bad_request_error};
 
 lazy_static! {
     // parse csv here from scratch :)
@@ -46,9 +46,7 @@ pub async fn quote(req: HttpRequest) -> HttpResponse {
     };
 
     // choose random quote from quotes list
-    let mut rng = rand::thread_rng();
-
-    let quote = QUOTES.choose(&mut rng).unwrap();
+    let quote = QUOTES.choose(&mut rand::thread_rng()).unwrap();
 
     HttpResponse::Ok().json(quote)
 }

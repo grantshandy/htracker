@@ -46,22 +46,16 @@ impl UserData {
 pub struct Task {
     // name that the user sees for the task
     pub name: String,
+    pub description: Option<String>,
     // 10 char alphanumeric string used for identification.
     // used so duplicate tasks can be created.
     pub id: String,
 }
 
-impl Task {
-    pub fn new<A: AsRef<str>>(name: A) -> Self {
-        let id = rand::thread_rng()
-            .sample_iter(&Alphanumeric)
-            .take(10)
-            .map(char::from)
-            .collect();
-
-        Self {
-            name: name.as_ref().to_string(),
-            id,
-        }
-    }
+pub fn gen_task_id() -> String {
+    rand::thread_rng()
+        .sample_iter(&Alphanumeric)
+        .take(10)
+        .map(char::from)
+        .collect()
 }
