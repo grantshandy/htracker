@@ -1,2 +1,2 @@
 [workspace]
-members = ["htracker-server"]
+members = ["website/backend"]

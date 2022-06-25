@@ -17,6 +17,8 @@ mod email;
 mod public;
 mod quote;
 
+const BASE_WEB_DIR: &'static str = "../../frontend/dist";
+
 #[derive(FromArgs, Clone)]
 /// Htracker server
 struct HtrackerArgs {

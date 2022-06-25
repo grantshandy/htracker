@@ -2,7 +2,7 @@ use actix_web::{get, http::header::ContentType, HttpResponse};
 use lazy_static::lazy_static;
 
 lazy_static! {
-    static ref LOGIN: String = include_str!("../web/login/login.html")
+    static ref LOGIN: String = include_str!(BASE_WEB_DIR + "/login.html")
         .replace("INSERT_SCRIPT", include_str!("../web/login/login.js"));
     static ref REGISTER: String = include_str!("../web/register/register.html")
         .replace("INSERT_SCRIPT", include_str!("../web/register/register.js"));
