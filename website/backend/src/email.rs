@@ -12,7 +12,7 @@ htracker validation
 
 Hello, NAME, click the link below to validate your account.
 ";
-
+ 
 const SENDER_EMAIL: &'static str = "validation@htracker.xyz";
 const SENDER_NAME: &'static str = "Htracker Account Validation";
 
