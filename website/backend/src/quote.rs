@@ -6,7 +6,6 @@ use serde::{Deserialize, Serialize};
 use crate::{auth, bad_request_error};
 
 lazy_static! {
-    // parse csv here from scratch :)
     pub static ref QUOTES: Vec<Quote> = {
         let text = include_str!("../res/quotes");
 
@@ -18,10 +17,7 @@ lazy_static! {
             let author = split[0].to_string();
             let text = split[1].to_string();
 
-            res.push(Quote {
-                text,
-                author,
-            });
+            res.push(Quote { text, author });
         }
 
         res

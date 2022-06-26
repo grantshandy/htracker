@@ -1,14 +1,19 @@
 const { defineConfig } = require('@vue/cli-service')
 module.exports = defineConfig({
   transpileDependencies: true,
+  productionSourceMap: false,
   pages: {
     index: {
       entry: 'src/pages/index/main.js',
-      title: 'Htracker Home'
+      title: 'htracker'
     },
     login: {
       entry: 'src/pages/login/login.js',
-      title: 'Login to Htracker'
+      title: 'Login to htracker'
+    },
+    register: {
+      entry: 'src/pages/register/register.js',
+      title: 'Register for htracker'
     }
   },
   chainWebpack : (config) => {

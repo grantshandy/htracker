@@ -1,17 +1,13 @@
 all:
-	npx tailwindcss -i web/input.css -o web/tailwind.css
-	cargo build
+	cd frontend && npm run build && cd ..
+	cd backend && cargo build
 
 release:
-	npx tailwindcss -i web/input.css -o web/tailwind.css
-	cargo build --release
+	cd backend && cargo build --release
 
-debug:
+run:
 	make
-	RUST_LOG=info ../target/debug/htracker-server --ip "127.0.0.1" --port 8080 --base-url "http://localhost:8080"
-
-debug-watch:
-	cargo watch -- make debug
+	RUST_LOG=info ../target/debug/htracker-server --ip "127.0.0.1" --http-port 8080 --base-url "http://localhost:8080"
 
 send:
 	make release

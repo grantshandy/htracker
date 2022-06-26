@@ -9,15 +9,12 @@ use argh::FromArgs;
 use mongodb::{options::ClientOptions, Client, Database};
 use rustls::{Certificate, PrivateKey, ServerConfig};
 use rustls_pemfile::{certs, pkcs8_private_keys};
-use actix_web_lab::middleware::RedirectHttps;
 
 mod auth;
 mod data;
 mod email;
 mod public;
 mod quote;
-
-const BASE_WEB_DIR: &'static str = "../../frontend/dist";
 
 #[derive(FromArgs, Clone)]
 /// Htracker server
@@ -28,9 +25,12 @@ struct HtrackerArgs {
     /// ip address to serve on
     #[argh(option)]
     ip: String,
-    /// port to serve on
+    /// http port to serve on
     #[argh(option)]
-    port: u16,
+    http_port: u16,
+    /// https port to serve on
+    #[argh(option)]
+    https_port: Option<u16>,
     /// cert to use
     #[argh(option)]
     cert: Option<String>,
@@ -46,16 +46,27 @@ struct ServerData {
 }
 
 #[tokio::main]
-async fn main() -> std::io::Result<()> {
+async fn main() {
+    match run().await {
+        Ok(_) => (),
+        Err(err) => {
+            eprintln!("htracker failed to execute");
+            println!("Error:\n{:?}", err);
+            std::process::exit(1);
+        }
+    }
+}
+
+async fn run() -> std::io::Result<()> {
     // init logger
     pretty_env_logger::init_custom_env("info");
 
-    // init args
+    // init args and port for http
     let args: HtrackerArgs = argh::from_env();
     let ip = &args.ip;
-    let port = &args.port;
 
-    println!("starting http server on {ip}:{port}");
+    let http_serve_str = format!("{}:{}", ip, args.http_port);
+    println!("starting http on {http_serve_str}");
 
     // connect to mongodb
     let mut client_options = ClientOptions::parse("mongodb://localhost:27017")
@@ -71,8 +82,6 @@ async fn main() -> std::io::Result<()> {
         args: args.clone(),
     };
 
-    let port_clone = port.clone();
-
     // start http server
     let mut server = HttpServer::new(move || {
         // init rate limiter
@@ -87,17 +96,21 @@ async fn main() -> std::io::Result<()> {
 
         App::new()
             .wrap(Logger::default())
-            .wrap(RedirectHttps::default().to_port(port_clone))
             .wrap(rate_limiter)
             .app_data(server_data.clone())
             // these are all their individual services
             // instead of accessing a directory because
             // I want the binary to be self contained
-            .service(public::index)
+            .service(public::chunk_vendors)
             .service(public::login)
+            .service(public::login_css)
+            .service(public::login_js)
+            .service(public::index)
+            .service(public::index_css)
+            .service(public::index_js)
             .service(public::register)
-            .service(public::dashboard)
-            .service(public::tailwind)
+            .service(public::register_css)
+            .service(public::register_js)
             // serve quotes
             .service(quote::quote)
             // auth is the authentication and user
@@ -110,35 +123,35 @@ async fn main() -> std::io::Result<()> {
             .service(data::add_task)
             .service(data::remove_task)
             .service(data::get_tasks)
-    });
+    })
+    .bind(http_serve_str)?;
 
+    // init https if required
+    // hopefully rust will eventually figure out the 'if let Enum' chaining bullshit in a new release
     if let Some(cert) = &args.cert {
         println!("using cert at {cert}");
         if let Some(key) = &args.key {
             println!("using key at {key}");
-            server = server.bind_rustls(&format!("{ip}:{port}"), rustls_config(cert, key))?
+            if let Some(https_port) = &args.https_port {
+                let https_serve_str = format!("{ip}:{https_port}");
+                println!("serving https on {https_serve_str}");
+                server = server.bind_rustls(&https_serve_str, rustls_config(cert, key))?;
+            }
         }
-    } else {
-        server = server.bind(&format!("{ip}:{port}"))?
     }
 
-    match server.run().await {
-        Ok(_) => (),
-        Err(err) => {
-            eprintln!("unable to start server, error: {err}");
-            std::process::exit(1);
-        }
-    };
+    // run the server
+    server.run().await?;
 
     Ok(())
 }
 
 pub fn bad_request_error(error: &str) -> HttpResponse {
-    HttpResponse::BadRequest().json(error)
+    HttpResponse::BadRequest().body(format!("{{\"error\":\"{error}\"}}"))
 }
 
 pub fn server_error(error: &str) -> HttpResponse {
-    HttpResponse::InternalServerError().json(error)
+    HttpResponse::InternalServerError().body(format!("{{\"error\":\"{error}\"}}"))
 }
 
 fn rustls_config<A: AsRef<str>>(cert: A, key: A) -> ServerConfig {

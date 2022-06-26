@@ -1,52 +1,85 @@
 use actix_web::{get, http::header::ContentType, HttpResponse};
-use lazy_static::lazy_static;
 
-lazy_static! {
-    static ref LOGIN: String = include_str!(BASE_WEB_DIR + "/login.html")
-        .replace("INSERT_SCRIPT", include_str!("../web/login/login.js"));
-    static ref REGISTER: String = include_str!("../web/register/register.html")
-        .replace("INSERT_SCRIPT", include_str!("../web/register/register.js"));
-    static ref DASHBOARD: String = include_str!("../web/dashboard/dashboard.html").replace(
-        "INSERT_SCRIPT",
-        include_str!("../web/dashboard/dashboard.js")
-    );
-    static ref INDEX: String =
-        include_str!("../web/index.html").replace("INSERT_SCRIPT", include_str!("../web/index.js"));
+const CHUNK_VENDORS: &'static str = include_str!("../../frontend/dist/chunk-vendors.js");
+
+const LOGIN_CSS: &'static str = include_str!("../../frontend/dist/login.css");
+const LOGIN_HTML: &'static str = include_str!("../../frontend/dist/login.html");
+const LOGIN_JS: &'static str = include_str!("../../frontend/dist/login.js");
+
+const INDEX_CSS: &'static str = include_str!("../../frontend/dist/index.css");
+const INDEX_HTML: &'static str = include_str!("../../frontend/dist/index.html");
+const INDEX_JS: &'static str = include_str!("../../frontend/dist/index.js");
+
+const REGISTER_CSS: &'static str = include_str!("../../frontend/dist/register.css");
+const REGISTER_HTML: &'static str = include_str!("../../frontend/dist/register.html");
+const REGISTER_JS: &'static str = include_str!("../../frontend/dist/register.js");
+
+#[get("/chunk-vendors.js")]
+pub async fn chunk_vendors() -> HttpResponse {
+    HttpResponse::Ok()
+        // .content_type("application/javascript; charset=utf-8")
+        .body(CHUNK_VENDORS)
 }
-
-const TAILWIND: &'static str = include_str!("../web/tailwind.css");
 
 #[get("/login")]
 pub async fn login() -> HttpResponse {
     HttpResponse::Ok()
         .content_type(ContentType::html())
-        .body(LOGIN.as_str())
+        .body(LOGIN_HTML)
 }
 
-#[get("/register")]
-pub async fn register() -> HttpResponse {
+#[get("/login.css")]
+pub async fn login_css() -> HttpResponse {
     HttpResponse::Ok()
-        .content_type(ContentType::html())
-        .body(REGISTER.as_str())
+        .content_type("text/css; charset=utf-8")
+        .body(LOGIN_CSS)
 }
 
-#[get("/dashboard")]
-pub async fn dashboard() -> HttpResponse {
+#[get("/login.js")]
+pub async fn login_js() -> HttpResponse {
     HttpResponse::Ok()
-        .content_type(ContentType::html())
-        .body(DASHBOARD.as_str())
+        // .content_type("application/javascript; charset=utf-8")
+        .body(LOGIN_JS)
 }
 
 #[get("/")]
 pub async fn index() -> HttpResponse {
     HttpResponse::Ok()
         .content_type(ContentType::html())
-        .body(INDEX.as_str())
+        .body(INDEX_HTML)
 }
 
-#[get("/tailwind.css")]
-pub async fn tailwind() -> HttpResponse {
+#[get("/index.css")]
+pub async fn index_css() -> HttpResponse {
     HttpResponse::Ok()
         .content_type("text/css; charset=utf-8")
-        .body(TAILWIND)
+        .body(INDEX_CSS)
+}
+
+#[get("/index.js")]
+pub async fn index_js() -> HttpResponse {
+    HttpResponse::Ok()
+        .content_type("application/javascript; charset=utf-8")
+        .body(INDEX_JS)
+}
+
+#[get("/register")]
+pub async fn register() -> HttpResponse {
+    HttpResponse::Ok()
+        .content_type(ContentType::html())
+        .body(REGISTER_HTML)
+}
+
+#[get("/register.css")]
+pub async fn register_css() -> HttpResponse {
+    HttpResponse::Ok()
+        .content_type("text/css; charset=utf-8")
+        .body(REGISTER_CSS)
+}
+
+#[get("/register.js")]
+pub async fn register_js() -> HttpResponse {
+    HttpResponse::Ok()
+        .content_type("application/javascript; charset=utf-8")
+        .body(REGISTER_JS)
 }
