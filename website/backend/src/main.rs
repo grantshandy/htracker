@@ -111,6 +111,9 @@ async fn run() -> std::io::Result<()> {
             .service(public::register)
             .service(public::register_css)
             .service(public::register_js)
+            .service(public::dashboard)
+            .service(public::dashboard_css)
+            .service(public::dashboard_js)
             // serve quotes
             .service(quote::quote)
             // auth is the authentication and user

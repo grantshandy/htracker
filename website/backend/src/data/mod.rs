@@ -4,8 +4,10 @@ use rand::{distributions::Alphanumeric, Rng};
 use serde::{Deserialize, Serialize};
 
 mod tasks;
+mod mood;
 
 pub use tasks::{add_task, get_tasks, remove_task};
+pub use mood::log_mood;
 
 use crate::server_error;
 

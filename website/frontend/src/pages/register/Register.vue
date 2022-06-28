@@ -2,8 +2,8 @@
 	<div class="page-root">
 		<div v-cloak class="h-root">
 			<div class="h-top-text">
-				<a href="/">Home</a>
-				<div class="float-right">
+				<a class="md:float-left select-none" href="/">Home</a>
+				<div class="md:float-right">
 					<ColorSwitcher />
 				</div>
 			</div>
@@ -65,6 +65,11 @@ export default {
 			error: null,
 			info: null,
 			darkMode: false,
+		}
+	},
+	created() {
+		if (localStorage.getItem('accessToken')) {
+			window.location.href = '/dashboard';
 		}
 	},
 	methods: {

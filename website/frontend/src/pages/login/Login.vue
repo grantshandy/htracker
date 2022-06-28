@@ -2,8 +2,8 @@
 	<div class="page-root">
 		<div v-cloak class="h-root">
 			<div class="h-top-text">
-				<a href="/">Home</a>
-				<div class="float-right">
+				<a class="md:float-left select-none" href="/">Home</a>
+				<div class="md:float-right">
 					<ColorSwitcher />
 				</div>
 			</div>
@@ -12,17 +12,17 @@
 					<h1 class="h-title">Login</h1>
 					<div class="space-y-3 w-full">
 						<div>
-								<p>Username:</p>
-								<input type="text" class="w-full h-text-input" v-model="username">
-							</div>
-							<div>
-								<p>Password:</p>
-								<input type="password" class="w-full h-text-input" v-on:keypress="login" v-model="password">
+							<p>Username:</p>
+							<input type="text" class="w-full h-text-input" v-model="username">
+						</div>
+						<div>
+							<p>Password:</p>
+							<input type="password" class="w-full h-text-input" v-on:keypress="login" v-model="password">
 						</div>
 					</div>
 					<div class="flow-root text-base-01 dark:text-base-1">
 						<button v-on:click="login" class="float-left h-button">Login</button>
-						<a class="float-right align-bottom" href="/register">Register Instead</a>
+						<a class="float-right align-bottom select-none" href="/register">Register Instead</a>
 					</div>
 				</div>
 				<ErrorBox :error="error" v-if="error" v-on:close-box="error = null"/>
@@ -48,7 +48,11 @@ export default {
 			error: null,
 		}
 	},
-
+	created() {
+		if (localStorage.getItem('accessToken')) {
+			window.location.href = '/dashboard';
+		}
+	},
 	methods: {
 		login(event) {
 			// only really run this function when keypressed if we press enter
@@ -60,13 +64,12 @@ export default {
 
 			let username = this.username;
 			let password = this.password;
-			let accessToken = this.genAccessToken(username, password);
 
 			fetch(window.location.origin + '/api/auth', {
 					method: 'GET',
 					headers: {
 							'Accept': 'application/json',
-							'X-AuthToken': accessToken,
+							'X-AuthToken': this.genAccessToken(username, password),
 					},
 			})
 			.then(response => response.json())

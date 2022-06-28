@@ -2,7 +2,7 @@
 Description=Htracker HTTP Server
 
 [Service]
-ExecStart=/bin/bash /home/grant/htracker
+ExecStart=/home/htracker/htracker --ip "0.0.0.0" --http-port "80" --https-port "443" --base-url "https://htracker.xyz" --cert "/etc/letsencrypt/live/htracker.xyz/fullchain.pem" --key "/etc/letsencrypt/live/htracker.xyz/privkey.pem"
 
 [Install]
 WantedBy=multi-user.target

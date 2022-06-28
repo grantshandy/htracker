@@ -8,12 +8,12 @@ use super::{gen_task_id, user_data, Task};
 
 // task that the client sends when creating a new one
 #[derive(Serialize, Deserialize, Clone)]
-struct TaskInsertion {
+struct AddTask {
     pub name: String,
     pub description: Option<String>,
 }
 
-impl TaskInsertion {
+impl AddTask {
     pub fn to_task(&self) -> Task {
         Task {
             name: self.name.clone(),
@@ -35,7 +35,7 @@ pub async fn add_task(bytes: web::Bytes, req: HttpRequest) -> HttpResponse {
     };
 
     // serialize todo data
-    let task: TaskInsertion = match serde_json::from_slice(&bytes) {
+    let task: AddTask = match serde_json::from_slice(&bytes) {
         Ok(json) => json,
         Err(_) => return bad_request_error("bad data formatting"),
     };
@@ -70,7 +70,7 @@ pub async fn add_task(bytes: web::Bytes, req: HttpRequest) -> HttpResponse {
 
 // task that the client sends to remove_task
 #[derive(Serialize, Deserialize, Clone)]
-struct TaskQuery {
+struct RemoveTask {
     pub id: String,
 }
 
@@ -86,7 +86,7 @@ pub async fn remove_task(bytes: web::Bytes, req: HttpRequest) -> HttpResponse {
     };
 
     // get query from request
-    let query: TaskQuery = match serde_json::from_slice(&bytes) {
+    let query: RemoveTask = match serde_json::from_slice(&bytes) {
         Ok(query) => query,
         Err(_) => return bad_request_error("not formatted as json (must include id!)"),
     };

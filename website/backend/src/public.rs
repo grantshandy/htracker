@@ -14,6 +14,11 @@ const REGISTER_CSS: &'static str = include_str!("../../frontend/dist/register.cs
 const REGISTER_HTML: &'static str = include_str!("../../frontend/dist/register.html");
 const REGISTER_JS: &'static str = include_str!("../../frontend/dist/register.js");
 
+const DASHBOARD_CSS: &'static str = include_str!("../../frontend/dist/dashboard.css");
+const DASHBOARD_HTML: &'static str = include_str!("../../frontend/dist/dashboard.html");
+const DASHBOARD_JS: &'static str = include_str!("../../frontend/dist/dashboard.js");
+
+
 #[get("/chunk-vendors.js")]
 pub async fn chunk_vendors() -> HttpResponse {
     HttpResponse::Ok()
@@ -82,4 +87,25 @@ pub async fn register_js() -> HttpResponse {
     HttpResponse::Ok()
         .content_type("application/javascript; charset=utf-8")
         .body(REGISTER_JS)
+}
+
+#[get("/dashboard")]
+pub async fn dashboard() -> HttpResponse {
+    HttpResponse::Ok()
+        .content_type(ContentType::html())
+        .body(DASHBOARD_HTML)
+}
+
+#[get("/dashboard.css")]
+pub async fn dashboard_css() -> HttpResponse {
+    HttpResponse::Ok()
+        .content_type("text/css; charset=utf-8")
+        .body(DASHBOARD_CSS)
+}
+
+#[get("/dashboard.js")]
+pub async fn dashboard_js() -> HttpResponse {
+    HttpResponse::Ok()
+        .content_type("application/javascript; charset=utf-8")
+        .body(DASHBOARD_JS)
 }

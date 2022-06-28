@@ -4,7 +4,7 @@
 
 @layer components {
     .page-root {
-        @apply h-screen text-base-00 dark:text-base-0 bg-base-3 dark:bg-base-03;
+        @apply h-full min-h-screen text-base-00 dark:text-base-0 bg-base-3 dark:bg-base-03;
     }
 
     .h-root {
@@ -12,11 +12,15 @@
     }
 
     .h-top-text {
-        @apply flow-root text-sm mx-1;
+        @apply md:flow-root text-sm mx-1;
     }
 
     .h-box {
         @apply my-2 p-5 space-y-5 mx-auto border-solid border-base-00 dark:border-base-0 rounded-md border-2;
+    }
+
+    .h-inner-box {
+        @apply h-box p-0 m-0 space-y-0;
     }
 
     .h-title {
@@ -24,10 +28,10 @@
     }
 
     .h-button {
-        @apply px-2 py-1 rounded-md font-semibold bg-magenta text-base-2 hover:border-solid hover:border-base-00;
+        @apply px-2 py-1 rounded-md font-semibold bg-magenta text-base-2 hover:border-solid hover:border-base-00 select-none;
     }
 
     .h-text-input {
-        @apply px-2 bg-base-1 dark:bg-base-02 text-base-3 dark:text-base-00 rounded-sm;
+        @apply px-3 py-1.5 bg-base-2 dark:bg-base-02 outline-none text-base-01 dark:text-base-1 placeholder-base-01 dark:placeholder-base-1 rounded-md border-2;
     }
 }

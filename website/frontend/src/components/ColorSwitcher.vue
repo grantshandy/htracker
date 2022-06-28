@@ -1,6 +1,6 @@
 <template>
     <div>
-        <button v-on:click="toggleDarkMode">
+        <button class="select-none" v-on:click="toggleDarkMode">
             Switch to {{ darkMode ? "Light" : "Dark" }} Mode
         </button>
     </div>

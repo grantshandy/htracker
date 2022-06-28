@@ -27,6 +27,11 @@ export default {
 	name: 'Main',
 	components: {
 		ColorSwitcher,
-	}
+	},
+	created() {
+		if (localStorage.getItem('accessToken')) {
+			window.location.href = '/dashboard'
+		}
+	},
 }
 </script>

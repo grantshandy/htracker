@@ -14,6 +14,10 @@ module.exports = defineConfig({
     register: {
       entry: 'src/pages/register/register.js',
       title: 'Register for htracker'
+    },
+    dashboard: {
+      entry: 'src/pages/dashboard/dashboard.js',
+      title: 'htracker Dashboard'
     }
   },
   chainWebpack : (config) => {
