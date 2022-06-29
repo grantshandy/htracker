@@ -3,13 +3,15 @@ use mongodb::{bson::doc, Database};
 use rand::{distributions::Alphanumeric, Rng};
 use serde::{Deserialize, Serialize};
 
-mod tasks;
 mod mood;
+mod tasks;
 
-pub use tasks::{add_task, get_tasks, remove_task};
 pub use mood::log_mood;
+pub use tasks::{add_task, get_tasks, remove_task};
 
 use crate::server_error;
+
+use self::mood::Mood;
 
 /// get user data from auth token and db
 async fn user_data(auth_token: &str, db: &Database) -> Result<UserData, HttpResponse> {
@@ -31,6 +33,7 @@ async fn user_data(auth_token: &str, db: &Database) -> Result<UserData, HttpResp
 pub struct UserData {
     pub auth_token: String,
     pub tasks: Vec<Task>,
+    pub moods: Vec<Mood>,
 }
 
 impl UserData {
@@ -39,6 +42,7 @@ impl UserData {
         Self {
             auth_token: auth_token.as_ref().to_string(),
             tasks: Vec::new(),
+            moods: Vec::new(),
         }
     }
 }

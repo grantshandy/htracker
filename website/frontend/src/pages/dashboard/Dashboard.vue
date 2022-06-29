@@ -12,6 +12,7 @@
             </div>
             <div class="space-y-4">
                 <TaskList />
+                <MoodLogger />
                 <Quote />
             </div>
 		</div>
@@ -22,6 +23,7 @@
 import ColorSwitcher from '../../components/ColorSwitcher.vue'
 import Quote from '../../components/Quote.vue'
 import TaskList from '../../components/TaskList.vue'
+import MoodLogger from '../../components/MoodLogger.vue'
 
 export default {
     name: 'Dashboard',
@@ -29,6 +31,7 @@ export default {
         ColorSwitcher,
         Quote,
         TaskList,
+        MoodLogger,
     },
     data() {
         return {

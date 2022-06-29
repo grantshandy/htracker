@@ -12,15 +12,22 @@
                 <p class="text-center select-none">Loading Quote...</p>
             </div>
         </div>
+        <ErrorBox :error="error" v-if="error" v-on:close-box="error = null"/>
     </div>
 </template>
 
 <script>
+import ErrorBox from './ErrorBox.vue'
+
 export default {
     name: 'Quote',
+    components: {
+        ErrorBox,
+    },
     data() {
         return {
             quote: null,
+            error: null,
         }
     },
     async mounted() {
@@ -36,7 +43,10 @@ export default {
                 },
             })
             .then(response => response.json())
-            .then(response => this.quote = response);
+            .then(response => this.quote = response)
+            .catch(error => {
+                this.error = error.message;
+            });;
         }
     }
 }

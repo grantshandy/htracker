@@ -85,7 +85,8 @@ pub async fn register_account(bytes: web::Bytes, req: HttpRequest) -> HttpRespon
         return server_error("couldn't update new user database");
     };
 
-    HttpResponse::Ok().body(r##"{"info":"Validation email sent to your inbox, be sure to check your spam."}"##)
+    HttpResponse::Ok()
+        .body(r##"{"info":"Validation email sent to your inbox, be sure to check your spam."}"##)
 }
 
 async fn check_is_user_duplicate(

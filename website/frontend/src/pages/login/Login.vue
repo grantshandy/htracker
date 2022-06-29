@@ -85,7 +85,10 @@ export default {
 									this.error = "incorrect username or password";
 							}
 					}
-			});
+			})
+			.catch(error => {
+                this.error = error.message;
+            });;
 		},
 
 		setAccessToken(username, password) {

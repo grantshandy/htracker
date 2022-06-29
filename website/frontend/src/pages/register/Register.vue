@@ -123,7 +123,10 @@ export default {
 					this.password_confirm = null;
 					this.info = response.info;
 				}
-			});
+			})
+            .catch(error => {
+                this.error = error.message;
+            });;
 		},
 	}
 }

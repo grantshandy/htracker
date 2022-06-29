@@ -4,11 +4,13 @@
             <h1 class="h-title">Tasks</h1>
             <div class="flow-root">
                 <button class="float-left h-button" v-on:click="updateTasks">Refresh</button>
-                <p v-if="loading" class="float-right text-sm">Syncing...</p>
+                <Transition name="loading">
+                    <p v-if="loading" class="float-right text-sm">Syncing...</p>
+                </Transition>
             </div>
             <div v-if="tasks && tasks.length > 0" class="h-inner-box divide-y-2 divide-base-00 dark:divide-base-0">
                 <div v-bind:key="task" v-for="task in tasks">
-                    <div class="flow-root p-3 hover:bg-base-2 dark:hover:bg-base-02 rounded-md">
+                    <div class="flow-root p-3 bg-base-2 dark:bg-base-02 hover:bg-base-3 dark:hover:bg-base-03 rounded-md">
                         <p class="float-left select-none">{{ task.name }}</p>
                         <button class="float-right inline-flex items-center justify-center rounded-full select-none" v-on:click="removeTask(task)">
                             <svg class="h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
@@ -68,6 +70,9 @@ export default {
                 } else {
                     this.tasks = response;
                 }
+            })
+            .catch(error => {
+                this.error = error.message;
             });
 
             this.loading = false;
@@ -102,7 +107,10 @@ export default {
                 } else {
                     this.tasks = response;
                 }
-            });
+            })
+            .catch(error => {
+                this.error = error.message;
+            });;
 
             this.loading = false;
         },
@@ -133,10 +141,24 @@ export default {
                 } else {
                     this.tasks = response;
                 }
-            });
+            })
+            .catch(error => {
+                this.error = error.message;
+            });;
 
             this.loading = false;
         },
     }
 }
 </script>
+
+<style scoped>
+    .loading-leave-active, .loading-enter-active {
+        @apply duration-1000;
+        @apply transition;
+    }
+
+    .loading-enter-from, .loading-leave-to {
+        @apply opacity-0;
+    }
+</style>

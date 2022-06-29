@@ -13,16 +13,6 @@ struct AddTask {
     pub description: Option<String>,
 }
 
-impl AddTask {
-    pub fn to_task(&self) -> Task {
-        Task {
-            name: self.name.clone(),
-            description: self.description.clone(),
-            id: gen_task_id(),
-        }
-    }
-}
-
 #[post("/api/add_task")]
 pub async fn add_task(bytes: web::Bytes, req: HttpRequest) -> HttpResponse {
     // validate and get auth token
@@ -45,7 +35,11 @@ pub async fn add_task(bytes: web::Bytes, req: HttpRequest) -> HttpResponse {
     let db = &server_data.db;
 
     // create new internal todo with id
-    let task = task.to_task();
+    let task = Task {
+        name: task.name,
+        description: task.description,
+        id: gen_task_id(),
+    };
 
     // replace update db
     if db

@@ -126,6 +126,7 @@ async fn run() -> std::io::Result<()> {
             .service(data::add_task)
             .service(data::remove_task)
             .service(data::get_tasks)
+            .service(data::log_mood)
     })
     .bind(http_serve_str)?;
 

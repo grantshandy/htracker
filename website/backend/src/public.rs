@@ -18,7 +18,6 @@ const DASHBOARD_CSS: &'static str = include_str!("../../frontend/dist/dashboard.
 const DASHBOARD_HTML: &'static str = include_str!("../../frontend/dist/dashboard.html");
 const DASHBOARD_JS: &'static str = include_str!("../../frontend/dist/dashboard.js");
 
-
 #[get("/chunk-vendors.js")]
 pub async fn chunk_vendors() -> HttpResponse {
     HttpResponse::Ok()
