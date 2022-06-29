@@ -9,7 +9,7 @@
 			<div class="h-box text-center">
 				<div>
 					<h1 class="h-title">htracker</h1>
-					<p>A minimalist habit tracker, to-do list, and mood log. (WIP)</p>
+					<p>A minimalist habit tracker and to-do list. (WIP)</p>
 				</div>
 				<div class="flow-root text-base-01 dark:text-base-1">
 					<a class="float-left" href="/login">Login</a>
