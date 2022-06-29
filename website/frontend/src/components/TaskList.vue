@@ -11,7 +11,10 @@
             <div v-if="tasks && tasks.length > 0" class="h-inner-box divide-y-2 divide-base-00 dark:divide-base-0">
                 <div v-bind:key="task" v-for="task in tasks">
                     <div class="flow-root p-3 bg-base-2 dark:bg-base-02 hover:bg-base-3 dark:hover:bg-base-03 rounded-md">
-                        <p class="float-left select-none">{{ task.name }}</p>
+                        <div class="float-left select-none">
+                            <p class="font-semibold">{{ task.name }}</p>
+                            <p v-if="task.description" class="text-sm">{{ task.description }}</p>
+                        </div>
                         <button class="float-right inline-flex items-center justify-center rounded-full select-none" v-on:click="removeTask(task)">
                             <svg class="h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
@@ -20,9 +23,14 @@
                     </div>
                 </div>
             </div>
-            <div class="flex h-inner-box">
-                <input v-model="currentTask" class="flex-1 h-text-input rounded-none border-none" v-on:keypress="addTask" placeholder="Add Task">
-                <button class="h-button rounded-none rounded-r-sm" v-on:click="addTask">+</button>
+            <div class="space-y-3">
+                <div class="flex h-inner-box">
+                    <input v-model="currentName" class="flex-1 h-text-input rounded-none border-none" v-on:keypress="addTask" placeholder="Name">
+                    <button class="h-button rounded-none rounded-r-sm" v-on:click="addTask">+</button>
+                </div>
+                <div class="flex">
+                    <input v-model="currentDescription" class="h-text-input ml-4 flex-1" placeholder="Description">
+                </div>
             </div>
         </div>
         <ErrorBox :error="error" v-if="error" v-on:close-box="error = null"/>
@@ -43,7 +51,9 @@ export default {
             tasks: [],
             error: null,
             loading: false,
-            currentTask: '',
+            currentName: '',
+            currentDescription: '',
+            otherOptions: false,
         }
     },
     created() {
@@ -78,15 +88,18 @@ export default {
             this.loading = false;
         },
         async addTask(event) {
-            if ((event && event.key && event.key != 'Enter') || this.currentTask == '' || !this.currentTask) {
+            if ((event && event.key && event.key != 'Enter') || this.currentName == '' || !this.currentName) {
                 return;
             }
 
-            let currentTask = this.currentTask;
-            this.currentTask = '';
+            let currentName = this.currentName;
+            let currentDescription = this.currentDescription;
+
+            this.currentName = '';
+            this.currentDescription = '';
 
             // insert temporary task to site state to appear more responsive
-            this.tasks.push({ "name": currentTask });
+            this.tasks.push({ "name": currentName });
 
             this.loading = true;
 
@@ -97,7 +110,8 @@ export default {
                     'X-AuthToken': this.accessToken,
                 },
                 body: JSON.stringify({
-                    name: currentTask,
+                    name: currentName,
+                    description: currentDescription
                 }),
             })
             .then(response => response.json())
