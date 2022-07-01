@@ -32,6 +32,6 @@
     }
 
     .h-text-input {
-        @apply px-3 py-1.5 bg-base-2 dark:bg-base-02 outline-none text-base-01 dark:text-base-1 placeholder-base-01 dark:placeholder-base-1 rounded-md border-2;
+        @apply px-3 py-1.5 bg-base-2 dark:bg-base-02 outline-none text-base-00 dark:text-base-0 placeholder-base-1 dark:placeholder-base-01 rounded-md border-2;
     }
 }

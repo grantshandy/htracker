@@ -66,7 +66,7 @@ async fn run() -> std::io::Result<()> {
     let ip = &args.ip;
 
     let http_serve_str = format!("{}:{}", ip, args.http_port);
-    println!("starting http on {http_serve_str}");
+    println!("starting http on http://{http_serve_str}");
 
     // connect to mongodb
     let mut client_options = ClientOptions::parse("mongodb://localhost:27017")
@@ -137,7 +137,7 @@ async fn run() -> std::io::Result<()> {
             println!("using key at {key}");
             if let Some(https_port) = &args.https_port {
                 let https_serve_str = format!("{ip}:{https_port}");
-                println!("serving https on {https_serve_str}");
+                println!("serving https on https://{https_serve_str}");
                 server = server.bind_rustls(&https_serve_str, rustls_config(cert, key))?;
             }
         }

@@ -1,6 +1,6 @@
 /** @type {import('tailwindcss').Config} */
 module.exports = {
-  content: ["./src/**/*.{vue,js}"],
+  content: ['./src/**/*.{vue,js}'],
   theme: {
     // solarized color scheme
     colors: {
@@ -23,5 +23,4 @@ module.exports = {
     },
   },
   darkMode: 'class',
-  plugins: [],
 }

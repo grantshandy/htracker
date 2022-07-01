@@ -2,7 +2,7 @@
 	<div v-cloak class="page-root">
 		<div class="h-root">
 			<div class="h-top-text">
-				<div class="float-right">
+				<div class="md:float-right">
 					<ColorSwitcher />
 				</div>
 			</div>

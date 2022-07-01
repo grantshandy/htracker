@@ -1,6 +1,7 @@
 <template>
     <div>
         <div class="h-box">
+            <!-- quote -->
             <div v-if="quote" class="space-y-3">
                 <p class="font-semibold">"{{ quote.text }}"</p>
                 <div class="flow-root">
@@ -8,8 +9,11 @@
                     <p class="float-right text-sm">-{{ quote.author }}</p>
                 </div>
             </div>
-            <div v-else>
-                <p class="text-center select-none">Loading Quote...</p>
+            <!-- loading state -->
+            <div v-else class="flex items-center justify-center">
+                <Transition name="loading">
+                    <div style="border-top-color:transparent" class="w-16 h-16 border-magenta border-solid border-8 rounded-full animate-spin"></div>
+                </Transition>
             </div>
         </div>
         <ErrorBox :error="error" v-if="error" v-on:close-box="error = null"/>
@@ -35,6 +39,8 @@ export default {
     },
     methods: {
         async updateQuote() {
+            this.quote = null;
+
             await fetch(window.location.origin + '/api/quote', {
                 method: 'GET',
                 headers: {
@@ -51,3 +57,14 @@ export default {
     }
 }
 </script>
+
+<style scoped>
+    .loading-leave-active, .loading-enter-active {
+        @apply duration-1000;
+        @apply transition;
+    }
+
+    .loading-enter-from, .loading-leave-to {
+        @apply opacity-0;
+    }
+</style>
