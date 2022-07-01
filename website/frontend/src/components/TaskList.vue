@@ -4,13 +4,11 @@
             <!-- if initialized -->
             <div v-if="init" class="space-y-5">
                 <!-- title and refresh -->
-                <div class="space-y-2">
-                    <h1 class="h-title">Tasks</h1>
-                    <div class="flow-root">
-                        <button class="float-left h-button" v-on:click="updateTasks">Refresh</button>
-                        <Transition name="loading">
-                            <div v-if="loading" style="border-top-color:transparent" class="float-right w-7 h-7 border-4 border-magenta border-solid rounded-full animate-spin"></div>
-                        </Transition>
+                <div class="flex">
+                    <h1 class="flex-1 h-title">Tasks</h1>
+                    <div class="flex space-x-2 place-items-center">
+                        <div v-if="loading" style="border-top-color:transparent" class="float-right h-7 w-7 border-4 border-magenta border-solid rounded-full animate-spin"></div>
+                        <button class="h-button flex place-items-center space-x-2" v-on:click="updateTasks">Refresh</button>
                     </div>
                 </div>
                 <!-- add a task -->
