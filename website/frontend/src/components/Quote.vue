@@ -57,14 +57,3 @@ export default {
     }
 }
 </script>
-
-<style scoped>
-    .loading-leave-active, .loading-enter-active {
-        @apply duration-1000;
-        @apply transition;
-    }
-
-    .loading-enter-from, .loading-leave-to {
-        @apply opacity-0;
-    }
-</style>
