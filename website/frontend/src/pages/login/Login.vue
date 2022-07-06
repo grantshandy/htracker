@@ -49,7 +49,7 @@ export default {
 		}
 	},
 	created() {
-		if (localStorage.getItem('accessToken')) {
+		if (localStorage.getItem('sessionToken')) {
 			window.location.href = '/dashboard';
 		}
 	},
@@ -65,7 +65,7 @@ export default {
 			let username = this.username;
 			let password = this.password;
 
-			fetch(window.location.origin + '/api/auth', {
+			fetch(window.location.origin + '/api/login', {
 					method: 'GET',
 					headers: {
 							'Accept': 'application/json',
@@ -74,25 +74,16 @@ export default {
 			})
 			.then(response => response.json())
 			.then(response => {
-					console.log(response);
-					if (response.error) {
-							this.error = response.error;
-					} else {
-							if (response.valid == 'true') {
-									this.setAccessToken(username, password);
-									window.location.href = '/dashboard';
-							} else if (response.valid == 'false') {
-									this.error = "incorrect username or password";
-							}
-					}
+				if (response.error) {
+					this.error = response.error;
+				} else {
+					localStorage.setItem('sessionToken', response.sessionToken);
+					window.location.href = '/dashboard';
+				}
 			})
 			.catch(error => {
                 this.error = error.message;
             });;
-		},
-
-		setAccessToken(username, password) {
-			localStorage.setItem('accessToken', this.genAccessToken(username, password));
 		},
 
 		genAccessToken(username, password) {

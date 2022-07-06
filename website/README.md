@@ -10,12 +10,12 @@
  - Response: `{"error":"[ERROR]"}` or `{"info":"Validation email sent to your inbox, be sure to check your spam."}`.
 
 ```
-/api/auth
+/api/login
 ```
  - Description: Validate your user's username and password.
  - Type: GET
  - Headers: `X-AuthToken: [username:password in base64]`.
- - Response: `{"error":"[ERROR]"}` or `{"valid":[bool]}`.
+ - Response: `{"error":"[ERROR]"}` or `{"sessionToken":[SESSION TOKEN]}`.
 
 ## Quotes
 ```
@@ -23,6 +23,7 @@
 ```
  - Description: Get a random inspirational quote.
  - Type: GET
+ - Headers: `X-SessionToken: [SESSIONTOKEN]`.
  - Response: `{"quote":"[QUOTE]","author":"[AUTHOR]"}`.
 
 ### Tasks
@@ -31,7 +32,7 @@
 ```
  - Description: Retrieve all user tasks.
  - Type: GET
- - Headers: `X-AuthToken: [username:password in base64]`.
+ - Headers: `X-SessionToken: [SESSIONTOKEN]`.
  - Response: `{"error":"[ERROR]"}` or `{"auth_token":"[AUTH_TOKEN]","todos":[{"name":"[NAME]","id":"[ID]"},...]}`.
 
 ```
@@ -39,8 +40,8 @@
 ```
  - Description: remove a task
  - Type: POST
- - Headers: `X-AuthToken: [username:password in base64]`.
- - Request Body: `{"name":"[NAME]"}`.
+ - Headers: `X-SessionToken: [SESSIONTOKEN]`.
+ - Request Body: `{"name":"[NAME]" (optional: "description":"[DESCRIPTION]")}`.
  - Response: `{"error":"[ERROR]"}` or `{"auth_token":"[AUTH_TOKEN]","todos":[{"name":"[NAME]","id":"[ID]"},...]}`.
 
 ```
@@ -48,16 +49,6 @@
 ```
  - Description: add a task
  - Type: POST
- - Headers: `X-AuthToken: [username:password in base64]`.
+ - Headers: `X-SessionToken: [SESSIONTOKEN]`.
  - Request Body: `{"id":"[ID]"}`.
  - Response: `{"error":"[ERROR]"}` or `{"auth_token":"[AUTH_TOKEN]","todos":[{"name":"[NAME]","id":"[ID]"},...]}`.
-
- ### Mood
- ```
- /api/log_mood
- ```
- - Description: log mood
- - Type: POST
- - Headers: `X-AuthToken: [username:password in base64]`.
- - Request Body: `{"mood":"[1-5]"}`.
- - Response: `{"error":"[ERROR]"}` or `{"auth_token":"[AUTH_TOKEN]","moods":[]}`

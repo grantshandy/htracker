@@ -29,7 +29,7 @@ export default {
 		ColorSwitcher,
 	},
 	created() {
-		if (localStorage.getItem('accessToken')) {
+		if (localStorage.getItem('sessionToken')) {
 			window.location.href = '/dashboard'
 		}
 	},

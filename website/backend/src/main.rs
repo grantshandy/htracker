@@ -102,23 +102,24 @@ async fn run() -> std::io::Result<()> {
             // instead of accessing a directory because
             // I want the binary to be self contained
             .service(static_pages::chunk_vendors)
-            // .service(static_pages::login)
-            // .service(static_pages::login_css)
-            // .service(static_pages::login_js)
-            // .service(static_pages::index)
-            // .service(static_pages::index_css)
-            // .service(static_pages::index_js)
+            .service(static_pages::login)
+            .service(static_pages::login_css)
+            .service(static_pages::login_js)
+            .service(static_pages::index)
+            .service(static_pages::index_css)
+            .service(static_pages::index_js)
             .service(static_pages::register)
             .service(static_pages::register_css)
             .service(static_pages::register_js)
-            // .service(static_pages::dashboard)
-            // .service(static_pages::dashboard_css)
-            // .service(static_pages::dashboard_js)
+            .service(static_pages::dashboard)
+            .service(static_pages::dashboard_css)
+            .service(static_pages::dashboard_js)
             // serve quotes
             .service(quote::quote)
             // auth is the authentication and user
             // management module of the server
             .service(auth::login)
+            .service(auth::logout)
             .service(auth::register_account)
             .service(auth::validate_account)
             // these are the parts of the api

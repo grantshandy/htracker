@@ -70,8 +70,10 @@ pub async fn validate_session_token(req: &HttpRequest) -> Result<Option<String>,
         None => return Err(bad_request_error("must include token")),
     };
 
+    println!("{session_token}");
+
     match users
-        .find_one(doc! { "session_tokens": [ &session_token ] }, None)
+        .find_one(doc! { "session_tokens": &session_token }, None)
         .await {
             Ok(user_data) => match user_data {
                 Some(_) => return Ok(Some(session_token)),
@@ -86,7 +88,7 @@ pub async fn get_user_data<A: AsRef<str>>(req: &HttpRequest, session_token: A) -
     let users = &server_data.db.collection::<User>("users");
 
     match users
-        .find_one(doc! { "session_tokens": [ session_token.as_ref() ] }, None)
+        .find_one(doc! { "session_tokens": session_token.as_ref() }, None)
         .await {
             Ok(user_data) => match user_data {
                 Some(user_data) => return Ok(user_data.data),
@@ -161,16 +163,35 @@ pub async fn login(req: HttpRequest) -> HttpResponse {
     }
 }
 
-// #[get("/api/logout")]
-// pub async fn logout(req: HttpRequest) -> HttpResponse {
-//     let valid = match validate_auth_token(&req).await {
-//         Ok(res) => match res {
-//             Some(_) => true,
-//             None => false,
-//         },
-//         Err(err) => return err,
-//     };
+#[get("/api/logout")]
+pub async fn logout(req: HttpRequest) -> HttpResponse {
+    // validate and get session token
+    let session_token = match validate_session_token(&req).await {
+        Ok(auth_token) => match auth_token {
+            Some(auth_token) => auth_token,
+            None => return bad_request_error("invalid session token"),
+        },
+        Err(err) => return err,
+    };
 
-//     // another use of manual json formatting
-//     HttpResponse::Ok().body(format!("{{\"valid\":\"{valid}\"}}"))
-// }
+    // check to see if username and password are in our users database
+    let server_data: &ServerData = req.app_data().unwrap();
+    let users_db = server_data.db.collection::<User>("users");
+
+    match users_db
+        .find_one_and_update(
+            doc! { "session_tokens": &session_token },
+            doc! {"$pull": {"session_tokens": &session_token} },
+            None,
+        )
+        .await
+    {
+        Ok(data) => match data {
+            Some(_) => {
+                return HttpResponse::Ok().finish()
+            }
+            None => return bad_request_error("invalid session token"),
+        },
+        Err(err) => return server_error(&format!("error accessing database: {err}")),
+    }
+}

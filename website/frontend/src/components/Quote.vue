@@ -45,7 +45,7 @@ export default {
                 method: 'GET',
                 headers: {
                     'Accept': 'application/json',
-                    'X-AuthToken': localStorage.getItem('accessToken'),
+                    'X-SessionToken': localStorage.getItem('sessionToken'),
                 },
             })
             .then(response => response.json())

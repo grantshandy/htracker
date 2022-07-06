@@ -84,7 +84,7 @@ export default {
     data() {
         return {
             init: false,
-            accessToken: null,
+            sessionToken: null,
             tasks: [],
             error: null,
             loading: false,
@@ -95,9 +95,6 @@ export default {
             currentDescription: '',
             otherOptions: false,
         }
-    },
-    created() {
-        this.accessToken = localStorage.getItem('accessToken');
     },
     async mounted() {
         await this.updateTasks();
@@ -111,7 +108,7 @@ export default {
                 method: 'GET',
                 headers: {
                     'Accept': 'application/json',
-                    'X-AuthToken': this.accessToken,
+                    'X-SessionToken': localStorage.getItem('sessionToken'),
                 },
             })
             .then(response => response.json())
@@ -150,7 +147,7 @@ export default {
                 method: 'POST',
                 headers: {
                     'Accept': 'application/json',
-                    'X-AuthToken': this.accessToken,
+                    'X-SessionToken': localStorage.getItem('sessionToken'),
                 },
                 body: JSON.stringify({
                     name: currentName,
@@ -185,7 +182,7 @@ export default {
                 method: 'POST',
                 headers: {
                     'Accept': 'application/json',
-                    'X-AuthToken': this.accessToken,
+                    'X-SessionToken': localStorage.getItem('sessionToken'),
                 },
                 body: JSON.stringify({
                     id: task.id,
