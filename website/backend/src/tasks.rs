@@ -59,7 +59,7 @@ pub async fn add_task(bytes: web::Bytes, req: HttpRequest) -> HttpResponse {
     if let Some(error) =  db
         .collection::<User>("users")
         .find_one_and_update(
-            doc! { "session_tokens": [ &session_token ] },
+            doc! { "session_tokens": &session_token },
             doc! {"$addToSet": {"data.tasks": bson::to_bson(&task).unwrap()}},
             None,
         )
