@@ -1,121 +1,176 @@
 mod register;
-mod validate;
 
 use actix_web::{get, HttpRequest, HttpResponse};
+use blake2::{Blake2b512, Digest};
 use mongodb::bson::doc;
-pub use register::{register_account, NewUserInfo};
+use rand::{distributions::Alphanumeric, Rng};
+pub use register::{register_account, validate_account, NewUser};
 use serde::{Deserialize, Serialize};
-pub use validate::validate_account;
 
-use crate::{bad_request_error, server_error, ServerData};
+use crate::{bad_request_error, server_error, tasks::Task, ServerData};
 
 #[derive(Serialize, Deserialize, Debug)]
-pub struct UserInfo {
+pub struct User {
     pub username: String,
     pub password: String,
     pub email: String,
+    pub session_tokens: Vec<String>,
+    pub data: Data,
 }
 
-impl UserInfo {
-    pub fn from_new(new: &NewUserInfo) -> Self {
+impl User {
+    pub fn from_new(new: &NewUser) -> Self {
         Self {
             username: new.username.clone(),
-            password: new.password.clone(),
+            password: hash_from_password(&new.password),
             email: new.email.clone(),
+            session_tokens: Vec::new(),
+            data: Data::new(),
         }
     }
 }
 
-pub async fn validate_auth_token(req: &HttpRequest) -> Result<Option<String>, HttpResponse> {
-    // get token bytes from header
-    let auth_token = match req.headers().get("X-AuthToken") {
-        Some(token) => token,
+#[derive(Serialize, Deserialize, Debug)]
+pub struct Data {
+    pub tasks: Vec<Task>,
+}
+
+impl Data {
+    pub fn new() -> Self {
+        Self {
+            tasks: Vec::new()
+        }
+    }
+}
+
+pub fn hash_from_password<A: AsRef<str>>(pass: A) -> String {
+    let mut hasher = Blake2b512::new();
+    hasher.update(pass.as_ref().as_bytes());
+
+    base64::encode(hasher.finalize())
+}
+
+pub fn gen_session_token() -> String {
+    rand::thread_rng()
+        .sample_iter(&Alphanumeric)
+        .take(15)
+        .map(char::from)
+        .collect()
+}
+
+pub async fn validate_session_token(req: &HttpRequest) -> Result<Option<String>, HttpResponse> {
+    let server_data: &ServerData = req.app_data().unwrap();
+    let users = &server_data.db.collection::<User>("users");
+
+    let session_token = match req.headers().get("X-SessionToken") {
+        Some(bytes) => match String::from_utf8(bytes.as_bytes().to_vec()) {
+            Ok(session_token) => session_token,
+            Err(_) => return Err(bad_request_error("session token not formatted in utf8")),
+        },
         None => return Err(bad_request_error("must include token")),
     };
 
-    // base64 token in utf8
-    let auth_token = match String::from_utf8(auth_token.as_bytes().to_vec()) {
-        Ok(data) => data,
-        Err(_) => return Err(bad_request_error("couldn't turn encoded token into utf8")),
-    };
-
-    // username and password from auth token
-    let (username, password) = username_password_from_auth_token(&auth_token)?;
-
-    // check to see if username and password are in our users database
-    let server_data: &ServerData = req.app_data().unwrap();
-    match &server_data
-        .db
-        .collection::<UserInfo>("users")
-        .find_one(doc! { "username": username, "password": password }, None)
-        .await
-    {
-        Ok(data) => {
-            if data.is_none() {
-                return Ok(None);
-            }
+    match users
+        .find_one(doc! { "session_tokens": [ &session_token ] }, None)
+        .await {
+            Ok(user_data) => match user_data {
+                Some(_) => return Ok(Some(session_token)),
+                None => return Ok(None),
+            },
+            Err(error) => Err(server_error(&format!("internal server error: {error}"))),
         }
-        Err(err) => return Err(server_error(&format!("error accessing database: {err}"))),
-    };
-
-    Ok(Some(auth_token))
 }
 
-/// get username and password from utf8 base64 auth_token.
-pub fn username_password_from_auth_token<A: AsRef<str>>(
-    auth_token: A,
-) -> Result<(String, String), HttpResponse> {
-    let auth_token = match base64::decode(auth_token.as_ref()) {
-        Ok(auth_token) => match String::from_utf8(auth_token) {
-            Ok(auth_token) => auth_token,
-            Err(_) => return Err(bad_request_error("token not utf8")),
-        },
-        Err(_) => return Err(bad_request_error("token not base64")),
+pub async fn get_user_data<A: AsRef<str>>(req: &HttpRequest, session_token: A) -> Result<Data, HttpResponse> {
+    let server_data: &ServerData = req.app_data().unwrap();
+    let users = &server_data.db.collection::<User>("users");
+
+    match users
+        .find_one(doc! { "session_tokens": [ session_token.as_ref() ] }, None)
+        .await {
+            Ok(user_data) => match user_data {
+                Some(user_data) => return Ok(user_data.data),
+                None => return Err(server_error("couldn't retrieve user data from session token")),
+            },
+            Err(error) => Err(server_error(&format!("internal server error: {error}"))),
+        }
+}
+
+#[get("/api/login")]
+pub async fn login(req: HttpRequest) -> HttpResponse {
+    // get user and validate login token in header
+    // get token bytes from header
+    // formated username:password in base64
+    let auth_token_bytes = match req.headers().get("X-AuthToken") {
+        Some(token) => token,
+        None => return bad_request_error("must include token"),
     };
 
-    let split = auth_token.split(':').collect::<Vec<&str>>();
+    // base64 token in utf8
+    let auth_token_base64 = match String::from_utf8(auth_token_bytes.as_bytes().to_vec()) {
+        Ok(data) => data,
+        Err(_) => return bad_request_error("couldn't turn encoded token into utf8"),
+    };
+
+    let auth_token_str = match base64::decode(auth_token_base64) {
+        Ok(auth_token) => match String::from_utf8(auth_token) {
+            Ok(auth_token) => auth_token,
+            Err(_) => return bad_request_error("token not utf8"),
+        },
+        Err(_) => return bad_request_error("token not base64"),
+    };
+
+    let split = auth_token_str.split(':').collect::<Vec<&str>>();
 
     if split.len() > 2 {
-        return Err(bad_request_error(
-            "token should be formatted username:password",
-        ));
+        return bad_request_error("token should be formatted username:password");
     }
 
     let username = match split.get(0) {
         Some(username) => username.to_string(),
-        None => {
-            return Err(bad_request_error(
-                "token should be formatted username:password",
-            ))
-        }
+        None => return bad_request_error("token should be formatted username:password"),
     };
 
     let password = match split.get(1) {
-        Some(username) => username.to_string(),
-        None => {
-            return Err(bad_request_error(
-                "token should be formatted username:password",
-            ))
-        }
+        Some(username) => hash_from_password(username.to_string()),
+        None => return bad_request_error("token should be formatted username:password"),
     };
 
-    Ok((username, password))
-}
+    // create random session token
+    let session_token = gen_session_token();
 
-pub fn gen_auth_key<A: AsRef<str>>(username: A, password: A) -> String {
-    base64::encode(format!("{}:{}", username.as_ref(), password.as_ref()))
-}
+    // check to see if username and password are in our users database
+    let server_data: &ServerData = req.app_data().unwrap();
+    let users_db = server_data.db.collection::<User>("users");
 
-#[get("/api/auth")]
-pub async fn auth(req: HttpRequest) -> HttpResponse {
-    let valid = match validate_auth_token(&req).await {
-        Ok(res) => match res {
-            Some(_) => true,
-            None => false,
+    match users_db
+        .find_one_and_update(
+            doc! { "username": username.clone(), "password": password },
+            doc! {"$addToSet": {"session_tokens": &session_token} },
+            None,
+        )
+        .await
+    {
+        Ok(data) => match data {
+            Some(_) => {
+                return HttpResponse::Ok().body(format!("{{\"sessionToken\":\"{session_token}\"}}"))
+            }
+            None => return bad_request_error("invalid username or password"),
         },
-        Err(err) => return err,
-    };
-
-    // another use of manual json formatting
-    HttpResponse::Ok().body(format!("{{\"valid\":\"{valid}\"}}"))
+        Err(err) => return server_error(&format!("error accessing database: {err}")),
+    }
 }
+
+// #[get("/api/logout")]
+// pub async fn logout(req: HttpRequest) -> HttpResponse {
+//     let valid = match validate_auth_token(&req).await {
+//         Ok(res) => match res {
+//             Some(_) => true,
+//             None => false,
+//         },
+//         Err(err) => return err,
+//     };
+
+//     // another use of manual json formatting
+//     HttpResponse::Ok().body(format!("{{\"valid\":\"{valid}\"}}"))
+// }

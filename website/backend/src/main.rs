@@ -11,10 +11,10 @@ use rustls::{Certificate, PrivateKey, ServerConfig};
 use rustls_pemfile::{certs, pkcs8_private_keys};
 
 mod auth;
-mod data;
 mod email;
-mod public;
 mod quote;
+mod static_pages;
+mod tasks;
 
 #[derive(FromArgs, Clone)]
 /// Htracker server
@@ -59,7 +59,7 @@ async fn main() {
 
 async fn run() -> std::io::Result<()> {
     // init logger
-    pretty_env_logger::init_custom_env("info");
+    pretty_env_logger::init();
 
     // init args and port for http
     let args: HtrackerArgs = argh::from_env();
@@ -101,31 +101,31 @@ async fn run() -> std::io::Result<()> {
             // these are all their individual services
             // instead of accessing a directory because
             // I want the binary to be self contained
-            .service(public::chunk_vendors)
-            .service(public::login)
-            .service(public::login_css)
-            .service(public::login_js)
-            .service(public::index)
-            .service(public::index_css)
-            .service(public::index_js)
-            .service(public::register)
-            .service(public::register_css)
-            .service(public::register_js)
-            .service(public::dashboard)
-            .service(public::dashboard_css)
-            .service(public::dashboard_js)
+            .service(static_pages::chunk_vendors)
+            // .service(static_pages::login)
+            // .service(static_pages::login_css)
+            // .service(static_pages::login_js)
+            // .service(static_pages::index)
+            // .service(static_pages::index_css)
+            // .service(static_pages::index_js)
+            .service(static_pages::register)
+            .service(static_pages::register_css)
+            .service(static_pages::register_js)
+            // .service(static_pages::dashboard)
+            // .service(static_pages::dashboard_css)
+            // .service(static_pages::dashboard_js)
             // serve quotes
             .service(quote::quote)
             // auth is the authentication and user
             // management module of the server
-            .service(auth::auth)
+            .service(auth::login)
             .service(auth::register_account)
             .service(auth::validate_account)
             // these are the parts of the api
             // that involve accessing user data
-            .service(data::add_task)
-            .service(data::remove_task)
-            .service(data::get_tasks)
+            .service(tasks::add_task)
+            .service(tasks::remove_task)
+            .service(tasks::get_tasks)
     })
     .bind(http_serve_str)?;
 
@@ -153,8 +153,8 @@ pub fn bad_request_error(error: &str) -> HttpResponse {
     HttpResponse::BadRequest().body(format!("{{\"error\":\"{error}\"}}"))
 }
 
-pub fn server_error(error: &str) -> HttpResponse {
-    HttpResponse::InternalServerError().body(format!("{{\"error\":\"{error}\"}}"))
+pub fn server_error<A: AsRef<str>>(error: A) -> HttpResponse {
+    HttpResponse::InternalServerError().body(format!("{{\"error\":\"{}\"}}", error.as_ref()))
 }
 
 fn rustls_config<A: AsRef<str>>(cert: A, key: A) -> ServerConfig {

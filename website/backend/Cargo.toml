@@ -23,4 +23,5 @@ rustls-pemfile = "1.0"
 lazy_static = "1.4"
 actix-extensible-rate-limit = "0.2"
 chrono = "0.4"
-bson = { version = "2.3.0", features = ["chrono-0_4"] } 
+bson = { version = "2.3", features = ["chrono-0_4"] } 
+blake2 = "0.10"

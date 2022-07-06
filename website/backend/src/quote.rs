@@ -32,11 +32,11 @@ pub struct Quote {
 
 #[get("/api/quote")]
 pub async fn quote(req: HttpRequest) -> HttpResponse {
-    // validate and get auth token
-    match auth::validate_auth_token(&req).await {
+    // validate and get session token
+    let _session_token = match auth::validate_session_token(&req).await {
         Ok(auth_token) => match auth_token {
-            Some(_) => (),
-            None => return bad_request_error("invalid auth token"),
+            Some(auth_token) => auth_token,
+            None => return bad_request_error("invalid session token"),
         },
         Err(err) => return err,
     };

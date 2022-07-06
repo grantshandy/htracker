@@ -1,13 +1,27 @@
-use actix_web::{get, post, web, HttpRequest, HttpResponse};
-use mongodb::bson::{self, doc};
+use actix_web::{post, web, HttpRequest, HttpResponse, get};
+use bson::doc;
+use rand::{distributions::Alphanumeric, Rng};
 use serde::{Deserialize, Serialize};
 
-use crate::{auth, bad_request_error, data::UserData, server_error, ServerData};
+use crate::{auth::{self, User, get_user_data}, bad_request_error, ServerData, server_error};
 
-use super::{gen_task_id, user_data, Task};
+#[derive(Debug, Serialize, Deserialize)]
+pub struct Task {
+    pub id: String,
+    pub name: String,
+    pub description: Option<String>,
+}
+
+pub fn gen_task_id() -> String {
+    rand::thread_rng()
+        .sample_iter(&Alphanumeric)
+        .take(5)
+        .map(char::from)
+        .collect()
+}
 
 // task that the client sends when creating a new one
-#[derive(Serialize, Deserialize, Clone)]
+#[derive(Deserialize, Clone)]
 struct AddTask {
     pub name: String,
     pub description: Option<String>,
@@ -15,11 +29,11 @@ struct AddTask {
 
 #[post("/api/add_task")]
 pub async fn add_task(bytes: web::Bytes, req: HttpRequest) -> HttpResponse {
-    // validate and get auth token
-    let auth_token = match auth::validate_auth_token(&req).await {
+    // validate and get session token
+    let session_token = match auth::validate_session_token(&req).await {
         Ok(auth_token) => match auth_token {
             Some(auth_token) => auth_token,
-            None => return bad_request_error("invalid auth token"),
+            None => return bad_request_error("invalid session token"),
         },
         Err(err) => return err,
     };
@@ -42,39 +56,38 @@ pub async fn add_task(bytes: web::Bytes, req: HttpRequest) -> HttpResponse {
     };
 
     // replace update db
-    if db
-        .collection::<UserData>("userData")
+    if let Some(error) =  db
+        .collection::<User>("users")
         .find_one_and_update(
-            doc! { "auth_token": &auth_token },
-            doc! {"$addToSet" : {"tasks" : bson::to_bson(&task).unwrap()}},
+            doc! { "session_tokens": [ &session_token ] },
+            doc! {"$addToSet": {"data.tasks": bson::to_bson(&task).unwrap()}},
             None,
         )
-        .await
-        .is_err()
+        .await.err()
     {
-        return server_error("couldn't access internal database");
+        return server_error(format!("couldn't access internal database: {error}"));
     };
 
     // return updated task list
-    match user_data(&auth_token, db).await {
+    match get_user_data(&req, session_token).await {
         Ok(data) => HttpResponse::Ok().json(data.tasks),
         Err(err) => err,
     }
 }
 
 // task that the client sends to remove_task
-#[derive(Serialize, Deserialize, Clone)]
+#[derive(Deserialize, Clone)]
 struct RemoveTask {
     pub id: String,
 }
 
 #[post("/api/remove_task")]
 pub async fn remove_task(bytes: web::Bytes, req: HttpRequest) -> HttpResponse {
-    // validate and get auth token
-    let auth_token = match auth::validate_auth_token(&req).await {
+    // validate and get session token
+    let session_token = match auth::validate_session_token(&req).await {
         Ok(auth_token) => match auth_token {
             Some(auth_token) => auth_token,
-            None => return bad_request_error("invalid auth token"),
+            None => return bad_request_error("invalid session token"),
         },
         Err(err) => return err,
     };
@@ -91,10 +104,10 @@ pub async fn remove_task(bytes: web::Bytes, req: HttpRequest) -> HttpResponse {
 
     // remove todo from task list in db
     if db
-        .collection::<UserData>("userData")
+        .collection::<User>("users")
         .find_one_and_update(
-            doc! { "auth_token": &auth_token },
-            doc! {"$pull" : {"tasks" : {"id" : query.id }}},
+            doc! { "session_tokens": [ &session_token ] },
+            doc! {"$pull" : {"data.tasks" : {"id" : query.id }}},
             None,
         )
         .await
@@ -103,8 +116,8 @@ pub async fn remove_task(bytes: web::Bytes, req: HttpRequest) -> HttpResponse {
         return server_error("couldn't access internal database");
     };
 
-    // return updated tasks
-    match user_data(&auth_token, db).await {
+    // return updated task list
+    match get_user_data(&req, session_token).await {
         Ok(data) => HttpResponse::Ok().json(data.tasks),
         Err(err) => err,
     }
@@ -113,22 +126,18 @@ pub async fn remove_task(bytes: web::Bytes, req: HttpRequest) -> HttpResponse {
 // get all tasks
 #[get("/api/get_tasks")]
 pub async fn get_tasks(req: HttpRequest) -> HttpResponse {
-    // validate and get auth token
-    let auth_token = match auth::validate_auth_token(&req).await {
+    // validate and get session token
+    let session_token = match auth::validate_session_token(&req).await {
         Ok(auth_token) => match auth_token {
             Some(auth_token) => auth_token,
-            None => return bad_request_error("invalid auth token"),
+            None => return bad_request_error("invalid session token"),
         },
         Err(err) => return err,
     };
 
-    // get handle on internal database
-    let server_data: &ServerData = req.app_data().unwrap();
-    let db = &server_data.db;
-
-    // return user data
-    match user_data(&auth_token, db).await {
-        Ok(user_data) => HttpResponse::Ok().json(user_data.tasks),
+    // return updated task list
+    match get_user_data(&req, session_token).await {
+        Ok(data) => HttpResponse::Ok().json(data.tasks),
         Err(err) => err,
     }
 }
