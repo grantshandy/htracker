@@ -106,7 +106,7 @@ pub async fn remove_task(bytes: web::Bytes, req: HttpRequest) -> HttpResponse {
     if db
         .collection::<User>("users")
         .find_one_and_update(
-            doc! { "session_tokens": [ &session_token ] },
+            doc! { "session_tokens": &session_token },
             doc! {"$pull" : {"data.tasks" : {"id" : query.id }}},
             None,
         )
