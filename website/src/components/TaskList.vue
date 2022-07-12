@@ -25,23 +25,12 @@
                             <button v-on:click="showDescription = false" class="h-button rounded-none rounded-l-sm">Hide</button>
                             <input v-model="currentDescription" class="h-text-input w-full rounded-none border-none rounded-r-sm" v-on:keypress="addTask" placeholder=" Description">
                         </div>
-                        <!-- add repeat box -->
-                        <!-- <div v-if="showRepeat" class="flex space-x-2">
-                            <button v-on:click="showRepeat = false" class="h-button">Hide</button>
-                            <div class="inline-block place-items-center w-full h-10">
-                                Repeat every
-                                <input v-model="repeatEvery" type="number" class="h-text-input" min="1" max="50">
-                                weeks
-                                <span class="text-red">NOT FUNCTIONING</span>
-                            </div>
-                        </div> -->
                     </div>
                     <!-- add task feature buttons -->
                     <div v-if="!showDescription">
                         <div class="flex space-x-3 mt-3 place-items-center">
                             <button v-if="!showDescription" v-on:click="showDescription = true" class="h-button">Add Description</button>
                             <p>More Coming!</p>
-                            <!-- <button v-if="!showRepeat" v-on:click="showRepeat = true" class="h-button">Add Repeat</button> -->
                         </div>
                     </div>
                 </div>
@@ -133,10 +122,10 @@ export default {
             let currentName = this.currentName;
             let currentDescription = this.currentDescription;
 
-            this.currentName = '';
-            this.currentDescription = '';
+            this.currentName = null;
+            this.currentDescription = null;
+
             this.showDescription = false;
-            this.showRepeat = false;
 
             // insert temporary task to site state to appear more responsive
             this.tasks.push({ "name": currentName, "description": currentDescription });
@@ -164,7 +153,7 @@ export default {
             })
             .catch(error => {
                 this.error = error.message;
-            });;
+            });
 
             this.loading = false;
         },

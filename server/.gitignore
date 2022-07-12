@@ -1,0 +1,4 @@
+res/MAILJET_PUBLIC_KEY
+res/MAILJET_SECRET_KEY
+target/
+Cargo.lock
