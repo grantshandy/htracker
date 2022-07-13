@@ -86,7 +86,7 @@ async fn run() -> std::io::Result<()> {
     let mut server = HttpServer::new(move || {
         // init rate limiter
         let rate_limit_backend = InMemoryBackend::builder().build();
-        let rate_limit_input = SimpleInputFunctionBuilder::new(Duration::from_secs(60), 50)
+        let rate_limit_input = SimpleInputFunctionBuilder::new(Duration::from_secs(60), 90)
             .real_ip_key()
             .build();
 
