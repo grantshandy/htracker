@@ -51,7 +51,10 @@ pub async fn register_account(bytes: web::Bytes, req: HttpRequest) -> HttpRespon
     };
 
     // make sure no fields are blank
-    if register_request.username == "" || register_request.password == "" || register_request.email == "" {
+    if register_request.username == ""
+        || register_request.password == ""
+        || register_request.email == ""
+    {
         return bad_request_error("must include username, password, and email");
     }
 
@@ -155,7 +158,10 @@ pub async fn validate_account(
     )
 }
 
-async fn check_is_user_duplicate(user: &RegisterRequest, db: &Database) -> Result<bool, HttpResponse> {
+async fn check_is_user_duplicate(
+    user: &RegisterRequest,
+    db: &Database,
+) -> Result<bool, HttpResponse> {
     let users = db.collection::<User>("users");
     let new_users = db.collection::<NewUser>("newUsers");
 

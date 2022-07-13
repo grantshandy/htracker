@@ -1,9 +1,12 @@
-use actix_web::{post, web, HttpRequest, HttpResponse, get};
+use actix_web::{get, post, web, HttpRequest, HttpResponse};
 use bson::doc;
 use rand::{distributions::Alphanumeric, Rng};
 use serde::{Deserialize, Serialize};
 
-use crate::{auth::{self, User, get_user_data}, bad_request_error, ServerData, server_error};
+use crate::{
+    auth::{self, get_user_data, User},
+    bad_request_error, server_error, ServerData,
+};
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct Task {
@@ -56,14 +59,15 @@ pub async fn add_task(bytes: web::Bytes, req: HttpRequest) -> HttpResponse {
     };
 
     // replace update db
-    if let Some(error) =  db
+    if let Some(error) = db
         .collection::<User>("users")
         .find_one_and_update(
             doc! { "session_tokens": &session_token },
             doc! {"$addToSet": {"data.tasks": bson::to_bson(&task).unwrap()}},
             None,
         )
-        .await.err()
+        .await
+        .err()
     {
         return server_error(format!("couldn't access internal database: {error}"));
     };

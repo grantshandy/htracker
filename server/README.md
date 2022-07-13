@@ -1,6 +1,12 @@
+# htracker backend/webserver
+
+This is a monolithic webserver/api written in Rust. It has cli args, https support, rate limiting, a custom auth flow, and a mongodb backend. Not to mention that all of this compiles down to one independent binary! No external dependencies (besides maybe glibc) required! This makes it easy to send to and execute on your server.
+
+This server won't compile unless you've first build the frontend through the cargo-make system, so it's recommended that you build it in the way described in the main README.md
+
 # API Docs
 
-## Auth
+## Authentication
 ```
 /api/register
 ```
@@ -12,9 +18,17 @@
 ```
 /api/login
 ```
- - Description: Validate your user's username and password.
+ - Description: Get a new session token
+ - Type: POST
+ - Body: `{"username":"[USERNAME]","password":"[PASSWORD IN ARGON2]"}`.
+ - Response: `{"error":"[ERROR]"}` or `{"sessionToken":[SESSION TOKEN]}`.
+
+ ```
+/api/logout
+```
+ - Description: Discard your session token
  - Type: GET
- - Headers: `X-AuthToken: [username:password in base64]`.
+ - Headers: `X-SessionToken: [SESSIONTOKEN]`.
  - Response: `{"error":"[ERROR]"}` or `{"sessionToken":[SESSION TOKEN]}`.
 
 ## Quotes
@@ -33,7 +47,7 @@
  - Description: Retrieve all user tasks.
  - Type: GET
  - Headers: `X-SessionToken: [SESSIONTOKEN]`.
- - Response: `{"error":"[ERROR]"}` or `{"auth_token":"[AUTH_TOKEN]","todos":[{"name":"[NAME]","id":"[ID]"},...]}`.
+ - Response: `{"error":"[ERROR]"}` or `{"auth_token":"[AUTH_TOKEN]","todos":[{"name":"[NAME]","id":"[ID]"},...]}...`.
 
 ```
 /api/add_task
@@ -42,7 +56,7 @@
  - Type: POST
  - Headers: `X-SessionToken: [SESSIONTOKEN]`.
  - Request Body: `{"name":"[NAME]" (optional: "description":"[DESCRIPTION]")}`.
- - Response: `{"error":"[ERROR]"}` or `{"auth_token":"[AUTH_TOKEN]","todos":[{"name":"[NAME]","id":"[ID]"},...]}`.
+ - Response: `{"error":"[ERROR]"}` or `{"auth_token":"[AUTH_TOKEN]","todos":[{"name":"[NAME]","id":"[ID]"},...]}...`.
 
 ```
 /api/remove_task
@@ -51,4 +65,4 @@
  - Type: POST
  - Headers: `X-SessionToken: [SESSIONTOKEN]`.
  - Request Body: `{"id":"[ID]"}`.
- - Response: `{"error":"[ERROR]"}` or `{"auth_token":"[AUTH_TOKEN]","todos":[{"name":"[NAME]","id":"[ID]"},...]}`.
+ - Response: `{"error":"[ERROR]"}` or `{"auth_token":"[AUTH_TOKEN]","todos":[{"name":"[NAME]","id":"[ID]"},...]}...`.

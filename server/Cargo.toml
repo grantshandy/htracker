@@ -24,4 +24,5 @@ lazy_static = "1.4"
 actix-extensible-rate-limit = "0.2"
 chrono = "0.4"
 bson = { version = "2.3", features = ["chrono-0_4"] } 
-blake2 = "0.10"
+hex = "0.4"
+sha2 = "0.10"

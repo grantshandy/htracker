@@ -1,22 +1,22 @@
 use actix_web::{get, http::header::ContentType, HttpResponse};
 
-const CHUNK_VENDORS: &'static str = include_str!("../../target/dist/chunk-vendors.js");
+const CHUNK_VENDORS: &'static str = include_str!("../../website/dist/chunk-vendors.js");
 
-const LOGIN_CSS: &'static str = include_str!("../../target/dist/login.css");
-const LOGIN_HTML: &'static str = include_str!("../../target/dist/login.html");
-const LOGIN_JS: &'static str = include_str!("../../target/dist/login.js");
+const LOGIN_CSS: &'static str = include_str!("../../website/dist/login.css");
+const LOGIN_HTML: &'static str = include_str!("../../website/dist/login.html");
+const LOGIN_JS: &'static str = include_str!("../../website/dist/login.js");
 
-const INDEX_CSS: &'static str = include_str!("../../target/dist/index.css");
-const INDEX_HTML: &'static str = include_str!("../../target/dist/index.html");
-const INDEX_JS: &'static str = include_str!("../../target/dist/index.js");
+const INDEX_CSS: &'static str = include_str!("../../website/dist/index.css");
+const INDEX_HTML: &'static str = include_str!("../../website/dist/index.html");
+const INDEX_JS: &'static str = include_str!("../../website/dist/index.js");
 
-const REGISTER_CSS: &'static str = include_str!("../../target/dist/register.css");
-const REGISTER_HTML: &'static str = include_str!("../../target/dist/register.html");
-const REGISTER_JS: &'static str = include_str!("../../target/dist/register.js");
+const REGISTER_CSS: &'static str = include_str!("../../website/dist/register.css");
+const REGISTER_HTML: &'static str = include_str!("../../website/dist/register.html");
+const REGISTER_JS: &'static str = include_str!("../../website/dist/register.js");
 
-const DASHBOARD_CSS: &'static str = include_str!("../../target/dist/dashboard.css");
-const DASHBOARD_HTML: &'static str = include_str!("../../target/dist/dashboard.html");
-const DASHBOARD_JS: &'static str = include_str!("../../target/dist/dashboard.js");
+const DASHBOARD_CSS: &'static str = include_str!("../../website/dist/dashboard.css");
+const DASHBOARD_HTML: &'static str = include_str!("../../website/dist/dashboard.html");
+const DASHBOARD_JS: &'static str = include_str!("../../website/dist/dashboard.js");
 
 #[get("/chunk-vendors.js")]
 pub async fn chunk_vendors() -> HttpResponse {

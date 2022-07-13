@@ -35,6 +35,8 @@
 import ColorSwitcher from '../../components/ColorSwitcher.vue'
 import ErrorBox from '../../components/ErrorBox.vue'
 
+const shajs = require('sha.js');
+
 export default {
 	name: 'Login',
 	components: {
@@ -54,23 +56,23 @@ export default {
 		}
 	},
 	methods: {
-		login(event) {
+		async login(event) {
 			// only really run this function when keypressed if we press enter
 			if (event && event.key && event.key != 'Enter') {
-					return;
+				return;
 			}
 
 			this.error = null;
 
-			let username = this.username;
-			let password = this.password;
-
 			fetch(window.location.origin + '/api/login', {
-					method: 'GET',
-					headers: {
-							'Accept': 'application/json',
-							'X-AuthToken': this.genAccessToken(username, password),
-					},
+				method: 'POST',
+				body: JSON.stringify({
+					username: this.username,
+					password: shajs('sha256').update(this.password).digest('hex'),
+				}),
+				headers: {
+					'Accept': 'application/json',
+				},
 			})
 			.then(response => response.json())
 			.then(response => {
@@ -83,11 +85,7 @@ export default {
 			})
 			.catch(error => {
                 this.error = error.message;
-            });;
-		},
-
-		genAccessToken(username, password) {
-			return btoa(`${username}:${password}`);
+            });
 		}
 	}
 }

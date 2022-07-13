@@ -12,7 +12,7 @@ use rustls_pemfile::{certs, pkcs8_private_keys};
 
 mod auth;
 mod email;
-mod quote;
+mod quotes;
 mod static_pages;
 mod tasks;
 
@@ -115,7 +115,7 @@ async fn run() -> std::io::Result<()> {
             .service(static_pages::dashboard_css)
             .service(static_pages::dashboard_js)
             // serve quotes
-            .service(quote::quote)
+            .service(quotes::quote)
             // auth is the authentication and user
             // management module of the server
             .service(auth::login)

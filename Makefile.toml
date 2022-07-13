@@ -1,0 +1,18 @@
+[tasks.release]
+command = "cargo"
+args = ["build", "--release"]
+dependencies = ["frontend"]
+
+[tasks.debug]
+command = "cargo"
+args = ["build"]
+dependencies = ["frontend"]
+
+[tasks.frontend]
+command = "./website/build-web.sh"
+
+[tasks.run]
+env = { "RUST_LOG" = "info" }
+command = "./target/debug/htracker-server"
+args = ["--ip", "0.0.0.0", "--http-port", "8080", "--base-url", "http://localhost:8080"]
+dependencies = ["debug"]
